@@ -1,0 +1,74 @@
+import { Bond, PurchaseOrder, SellRequest, IFAClient, TradeRecord } from "@/types";
+
+export const BONDS_CATALOG: Bond[] = [
+  { isin: "INE002A07RY8", name: "Reliance Industries Ltd 8.95% 2027", couponRate: 8.95, maturityDate: "2027-06-15", faceValue: 1000, creditRating: "AAA", issuer: "Reliance Industries" },
+  { isin: "INE040A08120", name: "HDFC Bank Ltd 7.95% 2028", couponRate: 7.95, maturityDate: "2028-03-20", faceValue: 1000, creditRating: "AAA", issuer: "HDFC Bank" },
+  { isin: "INE090A08UJ3", name: "ICICI Bank 8.40% 2026", couponRate: 8.40, maturityDate: "2026-09-10", faceValue: 1000, creditRating: "AA+", issuer: "ICICI Bank" },
+  { isin: "INE152A08101", name: "Bajaj Finance 9.10% 2029", couponRate: 9.10, maturityDate: "2029-01-25", faceValue: 1000, creditRating: "AAA", issuer: "Bajaj Finance" },
+  { isin: "INE261F08181", name: "Tata Capital 8.75% 2027", couponRate: 8.75, maturityDate: "2027-11-30", faceValue: 1000, creditRating: "AA+", issuer: "Tata Capital" },
+];
+
+export const MOCK_PORTFOLIO: PurchaseOrder[] = [
+  { orderId: "ORD-001", bond: BONDS_CATALOG[0], units: 50, purchaseDate: "2024-03-15", purchasePrice: 1020, availableUnits: 50 },
+  { orderId: "ORD-002", bond: BONDS_CATALOG[0], units: 30, purchaseDate: "2024-06-20", purchasePrice: 1015, availableUnits: 30 },
+  { orderId: "ORD-003", bond: BONDS_CATALOG[1], units: 100, purchaseDate: "2024-01-10", purchasePrice: 995, availableUnits: 100 },
+  { orderId: "ORD-004", bond: BONDS_CATALOG[2], units: 25, purchaseDate: "2025-01-05", purchasePrice: 1010, availableUnits: 25 },
+  { orderId: "ORD-005", bond: BONDS_CATALOG[3], units: 75, purchaseDate: "2024-11-18", purchasePrice: 1005, availableUnits: 75 },
+];
+
+export const MOCK_SELL_REQUESTS: SellRequest[] = [
+  {
+    id: "SR-001", investorName: "Nisha Sharma", investorId: "INV-001", bond: BONDS_CATALOG[0],
+    source: "liquibonds", units: 20, desiredYield: 9.25, transactionDate: "2026-03-18",
+    status: "under_negotiation", createdAt: "2026-03-10T10:30:00", updatedAt: "2026-03-12T14:00:00",
+    negotiationRounds: [
+      { round: 1, proposedBy: "investor", yield: 9.25, price: 1015, timestamp: "2026-03-10T10:30:00", deadline: "2026-03-12T10:30:00" },
+      { round: 2, proposedBy: "ops", yield: 9.50, price: 1008, timestamp: "2026-03-11T09:00:00", deadline: "2026-03-13T09:00:00" },
+    ],
+  },
+  {
+    id: "SR-002", investorName: "Rajesh Kumar", investorId: "INV-002", bond: BONDS_CATALOG[1],
+    source: "liquibonds", units: 50, desiredYield: 8.10, transactionDate: "2026-03-20",
+    status: "submitted", createdAt: "2026-03-12T08:00:00", updatedAt: "2026-03-12T08:00:00",
+    negotiationRounds: [],
+  },
+  {
+    id: "SR-003", investorName: "Priya Patel", investorId: "INV-003", bond: BONDS_CATALOG[2],
+    source: "external", units: 15, desiredYield: 8.60, transactionDate: "2026-03-17",
+    status: "accepted", createdAt: "2026-03-08T14:00:00", updatedAt: "2026-03-11T16:00:00",
+    dpAccountId: "1234567890123456", settlementDate: "2026-03-17",
+    negotiationRounds: [
+      { round: 1, proposedBy: "investor", yield: 8.60, price: 1005, timestamp: "2026-03-08T14:00:00", deadline: "2026-03-10T14:00:00" },
+    ],
+  },
+  {
+    id: "SR-004", investorName: "Amit Verma", investorId: "INV-004", bond: BONDS_CATALOG[3],
+    source: "liquibonds", units: 30, desiredYield: 9.30, transactionDate: "2026-03-15",
+    status: "settled", createdAt: "2026-03-05T11:00:00", updatedAt: "2026-03-13T09:00:00",
+    settlementDate: "2026-03-15", utrNumber: "UTR202603150001", rfqNumber: "RFQ-2026-0412",
+    negotiationRounds: [
+      { round: 1, proposedBy: "investor", yield: 9.30, price: 1002, timestamp: "2026-03-05T11:00:00", deadline: "2026-03-07T11:00:00" },
+    ],
+  },
+  {
+    id: "SR-005", investorName: "Sunita Reddy", investorId: "INV-005", bond: BONDS_CATALOG[4],
+    source: "liquibonds", units: 40, desiredYield: 8.90, transactionDate: "2026-03-16",
+    status: "terminated", createdAt: "2026-03-03T09:00:00", updatedAt: "2026-03-13T00:00:00",
+    negotiationRounds: [
+      { round: 1, proposedBy: "investor", yield: 8.90, price: 1010, timestamp: "2026-03-03T09:00:00", deadline: "2026-03-05T09:00:00" },
+      { round: 2, proposedBy: "ops", yield: 9.20, price: 998, timestamp: "2026-03-04T15:00:00", deadline: "2026-03-06T15:00:00" },
+      { round: 3, proposedBy: "investor", yield: 9.05, price: 1004, timestamp: "2026-03-06T10:00:00", deadline: "2026-03-08T10:00:00" },
+    ],
+  },
+];
+
+export const MOCK_IFA_CLIENTS: IFAClient[] = [
+  { id: "CLI-001", name: "Nisha Sharma", email: "nisha@example.com", phone: "9876543210", panNumber: "ABCDE1234F", holdings: [MOCK_PORTFOLIO[0], MOCK_PORTFOLIO[1]] },
+  { id: "CLI-002", name: "Rajesh Kumar", email: "rajesh@example.com", phone: "9876543211", panNumber: "FGHIJ5678K", holdings: [MOCK_PORTFOLIO[2]] },
+  { id: "CLI-003", name: "Priya Patel", email: "priya@example.com", phone: "9876543212", panNumber: "KLMNO9012P", holdings: [MOCK_PORTFOLIO[3], MOCK_PORTFOLIO[4]] },
+];
+
+export const MOCK_TRADES: TradeRecord[] = [
+  { id: "TR-001", sellRequestId: "SR-004", investorName: "Amit Verma", bond: BONDS_CATALOG[3], units: 30, settledYield: 9.30, settlementDate: "2026-03-15", utrNumber: "UTR202603150001", rfqNumber: "RFQ-2026-0412", status: "settled" },
+  { id: "TR-002", sellRequestId: "SR-003", investorName: "Priya Patel", bond: BONDS_CATALOG[2], units: 15, settledYield: 8.60, settlementDate: "2026-03-17", status: "pending_payment" },
+];
