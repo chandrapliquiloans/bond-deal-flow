@@ -76,4 +76,7 @@ export const MOCK_TRADES: TradeRecord[] = [
   { id: "TR-005", sellRequestId: "SR-005", investorName: "Sunita Reddy", bond: BONDS_CATALOG[4], units: 40, settledYield: 8.90, settlementDate: "2024-12-01", status: "approved" },
   { id: "TR-006", sellRequestId: "SR-006", investorName: "Amit Verma", bond: BONDS_CATALOG[3], units: 10, settledYield: 9.30, settlementDate: "2024-12-01", status: "approved" },
   { id: "TR-007", sellRequestId: "SR-003", investorName: "Priya Patel", bond: BONDS_CATALOG[2], units: 15, settledYield: 8.60, settlementDate: "2026-03-17", status: "approved" },
+  { id: "TR-008", sellRequestId: "SR-007", investorName: "Nisha Sharma", bond: BONDS_CATALOG[0], units: 25, settledYield: 9.25, settlementDate: "2025-01-15", status: "settled" },
+  { id: "TR-009", sellRequestId: "SR-008", investorName: "Rajesh Kumar", bond: BONDS_CATALOG[1], units: 30, settledYield: 8.10, settlementDate: "2025-02-20", status: "pending_payment" },
+  { id: "TR-010", sellRequestId: "SR-009", investorName: "Priya Patel", bond: BONDS_CATALOG[3], units: 20, settledYield: 9.30, settlementDate: "2025-03-10", status: "settled" },
 ];

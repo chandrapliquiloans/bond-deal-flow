@@ -15,10 +15,8 @@ const navItems: Record<UserRole, NavItem[]> = {
     { label: "Sell Requests", path: "/investor/sell-requests" },
   ],
   ifa: [
-    { label: "Dashboard", path: "/ifa" },
     { label: "Clients", path: "/ifa/clients" },
     { label: "Transactions", path: "/ifa/transactions" },
-    { label: "Sell", path: "/ifa/sell" },
   ],
   ops: [
     { label: "Sell Requests", path: "/ops/sell-requests" },

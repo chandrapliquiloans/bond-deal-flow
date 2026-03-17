@@ -11,7 +11,6 @@ import InvestorSellRequests from "./pages/investor/InvestorSellRequests";
 import InvestorTransactions from "./pages/investor/InvestorTransactions";
 import IFADashboard from "./pages/ifa/IFADashboard";
 import IFAClients from "./pages/ifa/IFAClients";
-import IFASell from "./pages/ifa/IFASell";
 import IFATransactions from "./pages/ifa/IFATransactions";
 import OpsSellRequests from "./pages/ops/OpsSellRequests";
 import OpsTodaysTrades from "./pages/ops/OpsTodaysTrades";
@@ -36,9 +35,8 @@ const App = () => (
           <Route path="/investor/transactions" element={<InvestorTransactions />} />
 
           {/* IFA Portal */}
-          <Route path="/ifa" element={<IFADashboard />} />
+          <Route path="/ifa" element={<Navigate to="/ifa/clients" replace />} />
           <Route path="/ifa/clients" element={<IFAClients />} />
-          <Route path="/ifa/sell" element={<IFASell />} />
           <Route path="/ifa/transactions" element={<IFATransactions />} />
 
           {/* Ops Portal */}
