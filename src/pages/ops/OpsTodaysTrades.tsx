@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { PortalLayout } from "@/components/PortalLayout";
-import { MOCK_TRADES } from "@/data/mockData";
+import { MOCK_TRADES, MOCK_SELL_REQUESTS } from "@/data/mockData";
 import { TradeRecord } from "@/types";
 import { Button } from "@/components/ui/button";
 import { formatDate } from "@/lib/utils";
@@ -93,6 +93,11 @@ export default function OpsTodaysTrades() {
     );
   }, [today]);
 
+  const getOrderId = (trade: TradeRecord) => {
+    const sellRequest = MOCK_SELL_REQUESTS.find(req => req.id === trade.sellRequestId);
+    return sellRequest?.orderId || "-";
+  };
+
   return (
     <PortalLayout role="ops">
       <div className="space-y-5">
@@ -120,6 +125,7 @@ export default function OpsTodaysTrades() {
                     investor: trade.investorName,
                     bond: trade.bond.name,
                     isin: trade.bond.isin,
+                    orderId: getOrderId(trade),
                     units: trade.units,
                     settledYield: trade.settledYield,
                     settlementDate: trade.settlementDate,
@@ -141,6 +147,7 @@ export default function OpsTodaysTrades() {
                 <th className="text-left p-3 font-medium">ID</th>
                 <th className="text-left p-3 font-medium">Investor</th>
                 <th className="text-left p-3 font-medium">Bond</th>
+                <th className="text-left p-3 font-medium">Order ID</th>
                 <th className="text-right p-3 font-medium">Units</th>
                 <th className="text-right p-3 font-medium">Yield</th>
                 <th className="text-left p-3 font-medium">Settlement</th>
@@ -153,6 +160,7 @@ export default function OpsTodaysTrades() {
                   <td className="p-3 font-mono text-xs">{trade.id}</td>
                   <td className="p-3 text-xs">{trade.investorName}</td>
                   <td className="p-3 text-xs truncate max-w-[180px]">{trade.bond.name}</td>
+                  <td className="p-3 font-mono text-xs">{getOrderId(trade)}</td>
                   <td className="p-3 text-right">{trade.units}</td>
                   <td className="p-3 text-right">{trade.settledYield ?? "-"}%</td>
                   <td className="p-3 text-xs">{trade.settlementDate}</td>

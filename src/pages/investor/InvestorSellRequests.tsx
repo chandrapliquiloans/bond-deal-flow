@@ -67,6 +67,7 @@ export default function InvestorSellRequests() {
               <tr className="bg-muted/50 text-xs text-muted-foreground">
                 <th className="text-left p-3 font-medium">Request ID</th>
                 <th className="text-left p-3 font-medium">Bond</th>
+                <th className="text-left p-3 font-medium">Order ID</th>
                 <th className="text-right p-3 font-medium">Units</th>
                 <th className="text-right p-3 font-medium">Yield</th>
                 <th className="text-left p-3 font-medium">Txn Date</th>
@@ -79,6 +80,7 @@ export default function InvestorSellRequests() {
                 <tr key={req.id} className="border-t border-border hover:bg-muted/30 transition-colors">
                   <td className="p-3 font-mono text-xs">{req.id}</td>
                   <td className="p-3 text-xs max-w-[200px] truncate">{req.bond.name.split(" ").slice(0, 3).join(" ")}</td>
+                  <td className="p-3 font-mono text-xs">{req.orderId || "-"}</td>
                   <td className="p-3 text-right">{req.units}</td>
                   <td className="p-3 text-right">{req.desiredYield}%</td>
                   <td className="p-3 text-xs">{req.transactionDate}</td>
@@ -109,6 +111,7 @@ export default function InvestorSellRequests() {
                 <div>
                   <p className="text-sm font-medium">{req.bond.name.split(" ").slice(0, 3).join(" ")}</p>
                   <p className="text-xs font-mono text-muted-foreground">{req.id}</p>
+                  <p className="text-xs text-muted-foreground">Order: {req.orderId || "-"}</p>
                 </div>
                 <StatusBadge status={req.status} />
               </div>

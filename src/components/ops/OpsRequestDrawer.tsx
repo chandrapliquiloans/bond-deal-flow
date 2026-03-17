@@ -59,6 +59,12 @@ export function OpsRequestDrawer({ request, onClose }: OpsRequestDrawerProps) {
               <span className="capitalize">{request.source}</span>
               <span className="text-muted-foreground">Units</span>
               <span>{request.units}</span>
+              {request.buyYield && (
+                <>
+                  <span className="text-muted-foreground">Buy Yield</span>
+                  <span>{request.buyYield}%</span>
+                </>
+              )}
               <span className="text-muted-foreground">Desired Yield</span>
               <span>{request.desiredYield}%</span>
               <span className="text-muted-foreground">Txn Date</span>

@@ -39,10 +39,12 @@ export interface SellRequest {
   source: BondSource;
   units: number;
   desiredYield: number;
+  buyYield?: number;
   transactionDate: string;
   status: SellRequestStatus;
   createdAt: string;
   updatedAt: string;
+  orderId?: string;
   dpAccountId?: string;
   negotiationRounds: NegotiationRound[];
   settlementDate?: string;

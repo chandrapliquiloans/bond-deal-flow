@@ -56,6 +56,7 @@ export default function OpsSellRequests() {
                 <th className="text-left p-3 font-medium">ID</th>
                 <th className="text-left p-3 font-medium">Investor</th>
                 <th className="text-left p-3 font-medium">Bond</th>
+                <th className="text-left p-3 font-medium">Order ID</th>
                 <th className="text-right p-3 font-medium">Units</th>
                 <th className="text-right p-3 font-medium">Yield</th>
                 <th className="text-left p-3 font-medium">Source</th>
@@ -69,6 +70,7 @@ export default function OpsSellRequests() {
                   <td className="p-3 font-mono text-xs">{req.id}</td>
                   <td className="p-3 text-xs">{req.investorName}</td>
                   <td className="p-3 text-xs truncate max-w-[160px]">{req.bond.name.split(" ").slice(0, 3).join(" ")}</td>
+                  <td className="p-3 font-mono text-xs">{req.orderId || "-"}</td>
                   <td className="p-3 text-right">{req.units}</td>
                   <td className="p-3 text-right">{req.desiredYield}%</td>
                   <td className="p-3 text-xs capitalize">{req.source}</td>
@@ -101,6 +103,7 @@ export default function OpsSellRequests() {
               </div>
               <div className="flex gap-3 text-xs text-muted-foreground">
                 <span className="font-mono">{req.id}</span>
+                <span>Order: {req.orderId || "-"}</span>
                 <span>{req.units}u</span>
                 <span>{req.desiredYield}%</span>
               </div>
