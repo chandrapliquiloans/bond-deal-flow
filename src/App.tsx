@@ -13,8 +13,8 @@ import IFADashboard from "./pages/ifa/IFADashboard";
 import IFAClients from "./pages/ifa/IFAClients";
 import IFASell from "./pages/ifa/IFASell";
 import IFATransactions from "./pages/ifa/IFATransactions";
-import OpsDashboard from "./pages/ops/OpsDashboard";
 import OpsSellRequests from "./pages/ops/OpsSellRequests";
+import OpsTodaysTrades from "./pages/ops/OpsTodaysTrades";
 import OpsTrades from "./pages/ops/OpsTrades";
 import NotFound from "./pages/NotFound";
 
@@ -30,7 +30,7 @@ const App = () => (
           <Route path="/" element={<LoginPage />} />
 
           {/* Investor Portal */}
-          <Route path="/investor" element={<InvestorHome />} />
+          <Route path="/investor" element={<Navigate to="/investor/portfolio" replace />} />
           <Route path="/investor/portfolio" element={<InvestorPortfolio />} />
           <Route path="/investor/sell-requests" element={<InvestorSellRequests />} />
           <Route path="/investor/transactions" element={<InvestorTransactions />} />
@@ -42,8 +42,9 @@ const App = () => (
           <Route path="/ifa/transactions" element={<IFATransactions />} />
 
           {/* Ops Portal */}
-          <Route path="/ops" element={<OpsDashboard />} />
+          <Route path="/ops" element={<Navigate to="/ops/sell-requests" replace />} />
           <Route path="/ops/sell-requests" element={<OpsSellRequests />} />
+          <Route path="/ops/todays-trade" element={<OpsTodaysTrades />} />
           <Route path="/ops/trades" element={<OpsTrades />} />
 
           <Route path="*" element={<NotFound />} />

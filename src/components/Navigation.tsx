@@ -11,9 +11,7 @@ interface NavItem {
 
 const navItems: Record<UserRole, NavItem[]> = {
   investor: [
-    { label: "Home", path: "/investor" },
-    { label: "Portfolio", path: "/investor/portfolio" },
-    { label: "Transactions", path: "/investor/transactions" },
+    { label: "Transactions", path: "/investor/portfolio" },
     { label: "Sell Requests", path: "/investor/sell-requests" },
   ],
   ifa: [
@@ -23,9 +21,9 @@ const navItems: Record<UserRole, NavItem[]> = {
     { label: "Sell", path: "/ifa/sell" },
   ],
   ops: [
-    { label: "Dashboard", path: "/ops" },
     { label: "Sell Requests", path: "/ops/sell-requests" },
-    { label: "Today's Trades", path: "/ops/trades" },
+    { label: "Today's Trade", path: "/ops/todays-trade" },
+    { label: "Transactions", path: "/ops/trades" },
   ],
 };
 
@@ -39,20 +37,25 @@ export function TopNav({ role }: TopNavProps) {
   const roleLabel = role === "investor" ? "Investor" : role === "ifa" ? "LiquiOne (IFA)" : "Ops Admin";
 
   return (
-    <header className="sticky top-0 z-50 border-b border-border bg-primary">
-      <div className="container flex h-14 items-center justify-between">
-        <div className="flex items-center gap-6">
-          <Link to={`/${role}`} className="text-lg font-semibold text-primary-foreground tracking-tight">
-            LiquiBonds
+    <header className="sticky top-0 z-50 border-b border-slate-200 bg-white shadow-sm">
+      <div className="container mx-auto flex h-16 items-center justify-between px-4 md:px-6">
+        {/* Logo */}
+        <div className="flex items-center gap-4">
+          <Link to={`/${role}`} className="flex items-center gap-2">
+            <span className="h-8 w-8 rounded-md bg-gradient-to-br from-emerald-500 to-sky-500" />
+            <span className="text-lg font-semibold tracking-tight text-slate-900">LiquiBonds</span>
           </Link>
-          <nav className="hidden md:flex items-center gap-1">
+
+          <nav className="hidden md:flex items-center gap-3">
             {items.map((item) => (
               <Link
                 key={item.path}
                 to={item.path}
                 className={cn(
-                  "nav-link text-primary-foreground/70 hover:text-primary-foreground hover:bg-primary-foreground/10",
-                  location.pathname === item.path && "text-primary-foreground bg-primary-foreground/15"
+                  "text-sm font-medium rounded-full px-4 py-2 transition",
+                  location.pathname === item.path
+                    ? "bg-emerald-50 text-emerald-700"
+                    : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
                 )}
               >
                 {item.label}
@@ -60,11 +63,15 @@ export function TopNav({ role }: TopNavProps) {
             ))}
           </nav>
         </div>
-        <div className="flex items-center gap-3">
-          <span className="hidden sm:inline text-xs text-primary-foreground/60 border border-primary-foreground/20 rounded px-2 py-0.5">
+
+        <div className="flex items-center gap-4">
+          <span className="hidden sm:inline text-xs text-slate-500 border border-slate-200 rounded px-2 py-1">
             {roleLabel}
           </span>
-          <Link to="/" className="text-xs text-primary-foreground/60 hover:text-primary-foreground">
+          <Link
+            to="/"
+            className="text-xs font-medium text-slate-600 hover:text-slate-900 border border-slate-200 rounded-full px-4 py-2"
+          >
             Logout
           </Link>
         </div>

@@ -69,6 +69,11 @@ export const MOCK_IFA_CLIENTS: IFAClient[] = [
 ];
 
 export const MOCK_TRADES: TradeRecord[] = [
-  { id: "TR-001", sellRequestId: "SR-004", investorName: "Amit Verma", bond: BONDS_CATALOG[3], units: 30, settledYield: 9.30, settlementDate: "2026-03-15", utrNumber: "UTR202603150001", rfqNumber: "RFQ-2026-0412", status: "settled" },
-  { id: "TR-002", sellRequestId: "SR-003", investorName: "Priya Patel", bond: BONDS_CATALOG[2], units: 15, settledYield: 8.60, settlementDate: "2026-03-17", status: "pending_payment" },
+  { id: "TR-001", sellRequestId: "SR-004", investorName: "Amit Verma", bond: BONDS_CATALOG[3], units: 30, settledYield: 9.30, settlementDate: "2024-12-01", utrNumber: "UTR202412010001", rfqNumber: "RFQ-2024-1201", status: "settled" },
+  { id: "TR-002", sellRequestId: "SR-003", investorName: "Priya Patel", bond: BONDS_CATALOG[2], units: 15, settledYield: 8.60, settlementDate: "2024-12-01", status: "approved" },
+  { id: "TR-003", sellRequestId: "SR-002", investorName: "Rajesh Kumar", bond: BONDS_CATALOG[1], units: 50, settledYield: 8.10, settlementDate: "2024-12-01", status: "approved" },
+  { id: "TR-004", sellRequestId: "SR-001", investorName: "Nisha Sharma", bond: BONDS_CATALOG[0], units: 20, settledYield: 9.25, settlementDate: "2024-12-01", status: "approved" },
+  { id: "TR-005", sellRequestId: "SR-005", investorName: "Sunita Reddy", bond: BONDS_CATALOG[4], units: 40, settledYield: 8.90, settlementDate: "2024-12-01", status: "approved" },
+  { id: "TR-006", sellRequestId: "SR-006", investorName: "Amit Verma", bond: BONDS_CATALOG[3], units: 10, settledYield: 9.30, settlementDate: "2024-12-01", status: "approved" },
+  { id: "TR-007", sellRequestId: "SR-003", investorName: "Priya Patel", bond: BONDS_CATALOG[2], units: 15, settledYield: 8.60, settlementDate: "2026-03-17", status: "approved" },
 ];

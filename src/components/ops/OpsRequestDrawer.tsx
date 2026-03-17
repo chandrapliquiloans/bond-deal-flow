@@ -4,6 +4,7 @@ import { StatusBadge } from "@/components/StatusBadge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { X, Check, XCircle, ArrowLeftRight } from "lucide-react";
 
 interface OpsRequestDrawerProps {
@@ -17,6 +18,7 @@ export function OpsRequestDrawer({ request, onClose }: OpsRequestDrawerProps) {
   const [modal, setModal] = useState<ModalType>(null);
   const [counterYield, setCounterYield] = useState("");
   const [counterNote, setCounterNote] = useState("");
+  const [actionRemark, setActionRemark] = useState("");
   const [confirmed, setConfirmed] = useState(false);
 
   const canNegotiate = ["submitted", "under_review", "under_negotiation"].includes(request.status);
@@ -105,20 +107,38 @@ export function OpsRequestDrawer({ request, onClose }: OpsRequestDrawerProps) {
               <div className="flex gap-3">
                 <Button
                   className="bg-success text-success-foreground hover:bg-success/90 rounded-sm text-sm gap-1 flex-1"
-                  onClick={() => setModal("accept")}
+                  onClick={() => {
+                    setModal("accept");
+                    setActionRemark("");
+                    setCounterNote("");
+                    setCounterYield("");
+                    setConfirmed(false);
+                  }}
                 >
                   <Check className="h-4 w-4" /> Accept
                 </Button>
                 <Button
                   variant="outline"
                   className="border-destructive text-destructive hover:bg-destructive/10 rounded-sm text-sm gap-1 flex-1"
-                  onClick={() => setModal("reject")}
+                  onClick={() => {
+                    setModal("reject");
+                    setActionRemark("");
+                    setCounterNote("");
+                    setCounterYield("");
+                    setConfirmed(false);
+                  }}
                 >
                   <XCircle className="h-4 w-4" /> Reject
                 </Button>
                 <Button
                   className="bg-warning text-warning-foreground hover:bg-warning/90 rounded-sm text-sm gap-1 flex-1"
-                  onClick={() => setModal("counter")}
+                  onClick={() => {
+                    setModal("counter");
+                    setActionRemark("");
+                    setCounterNote("");
+                    setCounterYield("");
+                    setConfirmed(false);
+                  }}
                 >
                   <ArrowLeftRight className="h-4 w-4" /> Counter
                 </Button>
@@ -151,7 +171,16 @@ export function OpsRequestDrawer({ request, onClose }: OpsRequestDrawerProps) {
               <h3 className="text-sm font-semibold capitalize">
                 {modal === "accept" ? "Accept Request" : modal === "reject" ? "Reject Request" : "Counter Proposal"}
               </h3>
-              <button onClick={() => { setModal(null); setConfirmed(false); }} className="text-muted-foreground hover:text-foreground">
+              <button
+                onClick={() => {
+                  setModal(null);
+                  setConfirmed(false);
+                  setActionRemark("");
+                  setCounterNote("");
+                  setCounterYield("");
+                }}
+                className="text-muted-foreground hover:text-foreground"
+              >
                 <X className="h-5 w-5" />
               </button>
             </div>
@@ -196,8 +225,34 @@ export function OpsRequestDrawer({ request, onClose }: OpsRequestDrawerProps) {
                       : "Submit a counter-proposal to the investor. They will have 48 working hours to respond."}
                   </p>
 
+                  <div className="space-y-3">
+                    <div className="space-y-2">
+                      <Label className="text-xs">Remark</Label>
+                      <Textarea
+                        value={actionRemark}
+                        onChange={(e) => setActionRemark(e.target.value)}
+                        className="rounded-sm"
+                        placeholder="Add a note for internal tracking (required)"
+                        rows={3}
+                      />
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      This remark will be recorded for audit purposes.
+                    </p>
+                  </div>
+
                   <div className="flex gap-3 justify-end">
-                    <Button variant="outline" className="rounded-sm text-sm" onClick={() => setModal(null)}>
+                    <Button
+                      variant="outline"
+                      className="rounded-sm text-sm"
+                      onClick={() => {
+                        setModal(null);
+                        setConfirmed(false);
+                        setActionRemark("");
+                        setCounterNote("");
+                        setCounterYield("");
+                      }}
+                    >
                       Cancel
                     </Button>
                     <Button
@@ -208,6 +263,7 @@ export function OpsRequestDrawer({ request, onClose }: OpsRequestDrawerProps) {
                           ? "bg-destructive text-destructive-foreground hover:bg-destructive/90"
                           : "bg-warning text-warning-foreground hover:bg-warning/90"
                       }`}
+                      disabled={!actionRemark.trim()}
                       onClick={() => setConfirmed(true)}
                     >
                       Confirm {modal === "accept" ? "Accept" : modal === "reject" ? "Reject" : "Counter"}
@@ -227,7 +283,14 @@ export function OpsRequestDrawer({ request, onClose }: OpsRequestDrawerProps) {
                   </p>
                   <Button
                     className="bg-accent text-accent-foreground hover:bg-accent/90 rounded-sm text-sm"
-                    onClick={() => { setModal(null); setConfirmed(false); onClose(); }}
+                    onClick={() => {
+                      setModal(null);
+                      setConfirmed(false);
+                      setActionRemark("");
+                      setCounterNote("");
+                      setCounterYield("");
+                      onClose();
+                    }}
                   >
                     Done
                   </Button>

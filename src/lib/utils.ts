@@ -28,6 +28,25 @@ export function addWorkingDays(date: Date, days: number): Date {
 }
 
 /**
+ * Returns true if the date is a working day (Monday–Friday).
+ */
+export function isWorkingDay(date: Date): boolean {
+  const day = date.getDay();
+  return day >= 1 && day <= 5;
+}
+
+/**
+ * Returns the next working day (Mon–Fri) on or after the given date.
+ */
+export function nextWorkingDay(date: Date): Date {
+  const result = new Date(date);
+  while (!isWorkingDay(result)) {
+    result.setDate(result.getDate() + 1);
+  }
+  return result;
+}
+
+/**
  * Formats a date to YYYY-MM-DD string
  */
 export function formatDate(date: Date): string {
