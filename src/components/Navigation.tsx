@@ -26,7 +26,6 @@ const navItems: Record<UserRole, NavItem[]> = {
     { label: "Dashboard", path: "/ops" },
     { label: "Sell Requests", path: "/ops/sell-requests" },
     { label: "Today's Trades", path: "/ops/trades" },
-    { label: "RFQ Management", path: "/ops/rfq" },
   ],
 };
 

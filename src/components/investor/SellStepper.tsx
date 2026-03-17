@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { X, Check, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { MOCK_PORTFOLIO, BONDS_CATALOG } from "@/data/mockData";
 import { Bond } from "@/types";
+import { addWorkingDays, formatDate } from "@/lib/utils";
 
 interface SellStepperProps {
   type: "internal" | "external";
@@ -27,8 +28,20 @@ export function SellStepper({ type, orderId, onClose }: SellStepperProps) {
   // Shared state
   const [desiredYield, setDesiredYield] = useState("");
   const [transactionDate, setTransactionDate] = useState("");
+  const [settlementDate, setSettlementDate] = useState("");
   const [disclaimerChecked, setDisclaimerChecked] = useState(false);
   const [confirmed, setConfirmed] = useState(false);
+
+  // Calculate settlement date (T+2 working days) when transaction date changes
+  useEffect(() => {
+    if (transactionDate) {
+      const tDate = new Date(transactionDate);
+      const settlement = addWorkingDays(tDate, 2);
+      setSettlementDate(formatDate(settlement));
+    } else {
+      setSettlementDate("");
+    }
+  }, [transactionDate]);
 
   const totalUnitsToSell = type === "internal" ? unitsToSell : externalUnits;
 
@@ -149,6 +162,11 @@ export function SellStepper({ type, orderId, onClose }: SellStepperProps) {
                     onChange={(e) => setTransactionDate(e.target.value)}
                     className="rounded-sm"
                   />
+                  {settlementDate && (
+                    <p className="text-xs text-muted-foreground">
+                      Settlement Date: <span className="font-semibold">{settlementDate}</span> (T+2 working days)
+                    </p>
+                  )}
                   <div className="bg-warning/10 border border-warning/30 rounded p-3 text-xs text-warning">
                     <strong>⚠ T-Day Warning:</strong> If negotiation is not resolved by the transaction
                     date, the order will be automatically terminated at 00:00 IST.
@@ -305,6 +323,11 @@ export function SellStepper({ type, orderId, onClose }: SellStepperProps) {
                   onChange={(e) => setTransactionDate(e.target.value)}
                   className="rounded-sm"
                 />
+                {settlementDate && (
+                  <p className="text-xs text-muted-foreground">
+                    Settlement Date: <span className="font-semibold">{settlementDate}</span> (T+2 working days)
+                  </p>
+                )}
                 <div className="bg-warning/10 border border-warning/30 rounded p-3 text-xs text-warning">
                   <strong>⚠ T-Day Warning:</strong> If negotiation is not resolved by the transaction
                   date, the order will be automatically terminated at 00:00 IST.
@@ -331,6 +354,8 @@ export function SellStepper({ type, orderId, onClose }: SellStepperProps) {
                   <span>{desiredYield}%</span>
                   <span className="text-muted-foreground">Transaction Date</span>
                   <span>{transactionDate}</span>
+                  <span className="text-muted-foreground">Settlement Date</span>
+                  <span>{settlementDate}</span>
                 </div>
               </div>
 

@@ -4,3 +4,32 @@ import { twMerge } from "tailwind-merge";
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
+
+/**
+ * Adds the specified number of working days (business days) to a given date.
+ * Working days are Monday to Friday, excluding weekends.
+ * @param date The starting date
+ * @param days The number of working days to add
+ * @returns The new date after adding the working days
+ */
+export function addWorkingDays(date: Date, days: number): Date {
+  const result = new Date(date);
+  let addedDays = 0;
+
+  while (addedDays < days) {
+    result.setDate(result.getDate() + 1);
+    // Check if it's a weekday (Monday = 1, Tuesday = 2, ..., Friday = 5)
+    if (result.getDay() >= 1 && result.getDay() <= 5) {
+      addedDays++;
+    }
+  }
+
+  return result;
+}
+
+/**
+ * Formats a date to YYYY-MM-DD string
+ */
+export function formatDate(date: Date): string {
+  return date.toISOString().split('T')[0];
+}

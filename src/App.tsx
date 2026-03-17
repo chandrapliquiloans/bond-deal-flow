@@ -16,7 +16,6 @@ import IFATransactions from "./pages/ifa/IFATransactions";
 import OpsDashboard from "./pages/ops/OpsDashboard";
 import OpsSellRequests from "./pages/ops/OpsSellRequests";
 import OpsTrades from "./pages/ops/OpsTrades";
-import OpsRFQ from "./pages/ops/OpsRFQ";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -46,7 +45,6 @@ const App = () => (
           <Route path="/ops" element={<OpsDashboard />} />
           <Route path="/ops/sell-requests" element={<OpsSellRequests />} />
           <Route path="/ops/trades" element={<OpsTrades />} />
-          <Route path="/ops/rfq" element={<OpsRFQ />} />
 
           <Route path="*" element={<NotFound />} />
         </Routes>

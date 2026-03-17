@@ -16,7 +16,6 @@ type ModalType = "accept" | "reject" | "counter" | null;
 export function OpsRequestDrawer({ request, onClose }: OpsRequestDrawerProps) {
   const [modal, setModal] = useState<ModalType>(null);
   const [counterYield, setCounterYield] = useState("");
-  const [counterPrice, setCounterPrice] = useState("");
   const [counterNote, setCounterNote] = useState("");
   const [confirmed, setConfirmed] = useState(false);
 
@@ -174,15 +173,6 @@ export function OpsRequestDrawer({ request, onClose }: OpsRequestDrawerProps) {
                           step="0.01"
                           value={counterYield}
                           onChange={(e) => setCounterYield(e.target.value)}
-                          className="rounded-sm"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label className="text-xs">Counter Price (₹)</Label>
-                        <Input
-                          type="number"
-                          value={counterPrice}
-                          onChange={(e) => setCounterPrice(e.target.value)}
                           className="rounded-sm"
                         />
                       </div>

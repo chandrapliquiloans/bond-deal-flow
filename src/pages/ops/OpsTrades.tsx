@@ -3,10 +3,12 @@ import { PortalLayout } from "@/components/PortalLayout";
 import { MOCK_TRADES } from "@/data/mockData";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Download, Upload, Check } from "lucide-react";
+import { Label } from "@/components/ui/label";
+import { Download, Upload, Check, X } from "lucide-react";
 
 export default function OpsTrades() {
-  const [utrInputs, setUtrInputs] = useState<Record<string, string>>({});
+  const [utrModalOpen, setUtrModalOpen] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   return (
     <PortalLayout role="ops">
@@ -17,7 +19,11 @@ export default function OpsTrades() {
             <p className="text-sm text-muted-foreground">Settlement and payment management</p>
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" className="text-xs rounded-sm h-8 gap-1">
+            <Button
+              variant="outline"
+              className="text-xs rounded-sm h-8 gap-1"
+              onClick={() => setUtrModalOpen(true)}
+            >
               <Upload className="h-3 w-3" /> Bulk UTR Upload
             </Button>
             <Button variant="outline" className="text-xs rounded-sm h-8 gap-1">
@@ -43,12 +49,12 @@ export default function OpsTrades() {
                   <div>
                     <p className="text-sm font-semibold">{trade.investorName}</p>
                     <p className="text-xs text-muted-foreground">
-                      {trade.bond.name.split(" ").slice(0, 3).join(" ")} · {trade.units} units
+                      {trade.bond?.name?.split(" ").slice(0, 3).join(" ") || "Unknown Bond"} · {trade.units} units
                     </p>
                   </div>
                   <span className={`status-badge ${statusColor}`}>
                     <span className="h-1.5 w-1.5 rounded-full bg-current" />
-                    {trade.status.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}
+                    {trade.status?.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()) || "Unknown"}
                   </span>
                 </div>
 
@@ -59,40 +65,17 @@ export default function OpsTrades() {
                   </div>
                   <div>
                     <p className="text-muted-foreground">Yield</p>
-                    <p>{trade.settledYield}%</p>
+                    <p>{trade.settledYield || 0}%</p>
                   </div>
                   <div>
                     <p className="text-muted-foreground">Settlement</p>
-                    <p>{trade.settlementDate}</p>
+                    <p>{trade.settlementDate || "—"}</p>
                   </div>
                   <div>
                     <p className="text-muted-foreground">RFQ #</p>
                     <p className="font-mono">{trade.rfqNumber || "—"}</p>
                   </div>
                 </div>
-
-                {/* UTR input for pending */}
-                {trade.status === "pending_payment" && (
-                  <div className="flex items-end gap-3 pt-2 border-t border-border">
-                    <div className="flex-1 space-y-1">
-                      <label className="text-xs text-muted-foreground">UTR Number</label>
-                      <Input
-                        value={utrInputs[trade.id] || ""}
-                        onChange={(e) =>
-                          setUtrInputs((prev) => ({ ...prev, [trade.id]: e.target.value }))
-                        }
-                        className="rounded-sm text-sm"
-                        placeholder="Enter UTR reference"
-                      />
-                    </div>
-                    <Button
-                      className="bg-accent text-accent-foreground hover:bg-accent/90 rounded-sm text-sm gap-1"
-                      disabled={!utrInputs[trade.id]}
-                    >
-                      <Upload className="h-3 w-3" /> Upload
-                    </Button>
-                  </div>
-                )}
 
                 {trade.utrNumber && (
                   <div className="text-xs flex items-center gap-1 text-success">
@@ -104,6 +87,77 @@ export default function OpsTrades() {
             );
           })}
         </div>
+
+        {/* UTR Upload Modal */}
+        {utrModalOpen && (
+          <div className="fixed inset-0 z-50 bg-foreground/50 flex items-center justify-center p-4">
+            <div className="bg-card w-full max-w-md rounded-lg shadow-xl">
+              {/* Header */}
+              <div className="flex items-center justify-between p-4 border-b border-border">
+                <h2 className="text-sm font-semibold">Bulk UTR Upload</h2>
+                <button
+                  onClick={() => {
+                    setUtrModalOpen(false);
+                    setSelectedFile(null);
+                  }}
+                  className="text-muted-foreground hover:text-foreground"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+
+              {/* Content */}
+              <div className="p-4 space-y-4">
+                <div className="space-y-2">
+                  <Label className="text-sm">Select UTR File</Label>
+                  <Input
+                    type="file"
+                    accept=".csv,.xlsx,.xls"
+                    onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
+                    className="rounded-sm"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Upload a CSV or Excel file containing UTR numbers for bulk processing.
+                  </p>
+                </div>
+
+                {selectedFile && (
+                  <div className="bg-muted/50 rounded p-3 text-xs">
+                    <p className="font-medium">Selected file:</p>
+                    <p className="text-muted-foreground">{selectedFile.name}</p>
+                    <p className="text-muted-foreground">Size: {(selectedFile.size / 1024).toFixed(1)} KB</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Footer */}
+              <div className="flex items-center justify-end gap-3 p-4 border-t border-border">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setUtrModalOpen(false);
+                    setSelectedFile(null);
+                  }}
+                  className="rounded-sm text-sm"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  className="bg-accent text-accent-foreground hover:bg-accent/90 rounded-sm text-sm gap-1"
+                  disabled={!selectedFile}
+                  onClick={() => {
+                    // Handle file upload logic here
+                    console.log("Uploading file:", selectedFile);
+                    setUtrModalOpen(false);
+                    setSelectedFile(null);
+                  }}
+                >
+                  <Upload className="h-3 w-3" /> Upload
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </PortalLayout>
   );
