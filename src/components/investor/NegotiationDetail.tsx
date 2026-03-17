@@ -3,7 +3,8 @@ import { SellRequest } from "@/types";
 import { StatusBadge } from "@/components/StatusBadge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ArrowLeft, Clock } from "lucide-react";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { ArrowLeft, Clock, MessageSquare } from "lucide-react";
 
 interface NegotiationDetailProps {
   request: SellRequest;
