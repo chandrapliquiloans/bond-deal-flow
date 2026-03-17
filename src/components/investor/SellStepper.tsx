@@ -8,21 +8,17 @@ import { Bond } from "@/types";
 
 interface SellStepperProps {
   type: "internal" | "external";
-  bondIsin: string | null;
+  orderId: string | null;
   onClose: () => void;
 }
 
-export function SellStepper({ type, bondIsin, onClose }: SellStepperProps) {
+export function SellStepper({ type, orderId, onClose }: SellStepperProps) {
   const [step, setStep] = useState(1);
   const totalSteps = type === "internal" ? 4 : 5;
 
-  // Internal sell state
-  const orders = bondIsin
-    ? MOCK_PORTFOLIO.filter((o) => o.bond.isin === bondIsin)
-    : [];
-  const [unitInputs, setUnitInputs] = useState<Record<string, number>>(
-    Object.fromEntries(orders.map((o) => [o.orderId, 0]))
-  );
+  // Internal sell state — single order only
+  const order = orderId ? MOCK_PORTFOLIO.find((o) => o.orderId === orderId) : undefined;
+  const [unitsToSell, setUnitsToSell] = useState(0);
 
   // External sell state
   const [selectedIsin, setSelectedIsin] = useState("");
@@ -35,14 +31,11 @@ export function SellStepper({ type, bondIsin, onClose }: SellStepperProps) {
   const [disclaimerChecked, setDisclaimerChecked] = useState(false);
   const [confirmed, setConfirmed] = useState(false);
 
-  const totalUnitsToSell =
-    type === "internal"
-      ? Object.values(unitInputs).reduce((a, b) => a + b, 0)
-      : externalUnits;
+  const totalUnitsToSell = type === "internal" ? unitsToSell : externalUnits;
 
   const selectedBond: Bond | undefined =
     type === "internal"
-      ? orders[0]?.bond
+      ? order?.bond
       : BONDS_CATALOG.find((b) => b.isin === selectedIsin);
 
   const yieldValid =
@@ -52,7 +45,7 @@ export function SellStepper({ type, bondIsin, onClose }: SellStepperProps) {
 
   const canProceedStep = (): boolean => {
     if (type === "internal") {
-      if (step === 1) return totalUnitsToSell > 0;
+      if (step === 1) return unitsToSell > 0 && unitsToSell <= (order?.availableUnits ?? 0);
       if (step === 2) return yieldValid && transactionDate !== "";
       if (step === 3) return disclaimerChecked;
     } else {
@@ -71,7 +64,7 @@ export function SellStepper({ type, bondIsin, onClose }: SellStepperProps) {
 
   const stepLabels =
     type === "internal"
-      ? ["Select Orders", "Yield & Date", "Review & Confirm", "Done"]
+      ? ["Select Units", "Yield & Date", "Review & Confirm", "Done"]
       : ["Select Bond", "Holdings & DP", "Yield & Date", "Review & Confirm", "Done"];
 
   return (
@@ -105,42 +98,41 @@ export function SellStepper({ type, bondIsin, onClose }: SellStepperProps) {
 
         {/* Content */}
         <div className="p-4 space-y-4">
-          {/* INTERNAL Step 1: Select Orders */}
-          {type === "internal" && step === 1 && (
-            <div className="space-y-3">
+          {/* INTERNAL Step 1: Select Units for single order */}
+          {type === "internal" && step === 1 && order && (
+            <div className="space-y-4">
               <p className="text-sm">
-                Select units to sell from <span className="font-semibold">{orders[0]?.bond.name}</span>
+                Sell from order <span className="font-mono font-semibold">{order.orderId}</span>
               </p>
-              {orders.map((order) => (
-                <div key={order.orderId} className="flex items-center justify-between bg-muted/50 rounded p-3">
-                  <div className="text-xs space-y-0.5">
-                    <p className="font-mono font-medium">{order.orderId}</p>
-                    <p className="text-muted-foreground">
-                      Available: {order.availableUnits} units · ₹{order.purchasePrice}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Label className="text-xs">Units</Label>
-                    <Input
-                      type="number"
-                      min={0}
-                      max={order.availableUnits}
-                      value={unitInputs[order.orderId] || ""}
-                      onChange={(e) => {
-                        const val = Math.min(
-                          Math.max(0, parseInt(e.target.value) || 0),
-                          order.availableUnits
-                        );
-                        setUnitInputs((prev) => ({ ...prev, [order.orderId]: val }));
-                      }}
-                      className="w-20 rounded-sm text-sm"
-                    />
-                  </div>
+              <div className="bg-muted/50 rounded p-3 text-xs space-y-1">
+                <p className="font-semibold">{order.bond.name}</p>
+                <p className="text-muted-foreground font-mono">{order.bond.isin}</p>
+                <div className="flex gap-4 mt-1 text-muted-foreground">
+                  <span>Purchased: {order.purchaseDate}</span>
+                  <span>Price: ₹{order.purchasePrice}</span>
                 </div>
-              ))}
-              <p className="text-xs text-muted-foreground">
-                Total units to sell: <span className="font-semibold text-foreground">{totalUnitsToSell}</span>
-              </p>
+              </div>
+              <div className="space-y-2">
+                <Label className="text-sm">Units to Sell (max {order.availableUnits})</Label>
+                <Input
+                  type="number"
+                  min={1}
+                  max={order.availableUnits}
+                  value={unitsToSell || ""}
+                  onChange={(e) => {
+                    const val = Math.min(
+                      Math.max(0, parseInt(e.target.value) || 0),
+                      order.availableUnits
+                    );
+                    setUnitsToSell(val);
+                  }}
+                  className="rounded-sm"
+                  placeholder={`1 – ${order.availableUnits}`}
+                />
+                {unitsToSell > order.availableUnits && (
+                  <p className="text-xs text-destructive">Cannot exceed {order.availableUnits} units</p>
+                )}
+              </div>
             </div>
           )}
 
@@ -250,6 +242,12 @@ export function SellStepper({ type, bondIsin, onClose }: SellStepperProps) {
                   <span className="font-medium">{selectedBond?.name}</span>
                   <span className="text-muted-foreground">ISIN</span>
                   <span className="font-mono">{selectedBond?.isin}</span>
+                  {type === "internal" && order && (
+                    <>
+                      <span className="text-muted-foreground">Order ID</span>
+                      <span className="font-mono">{order.orderId}</span>
+                    </>
+                  )}
                   <span className="text-muted-foreground">Units</span>
                   <span>{totalUnitsToSell}</span>
                   <span className="text-muted-foreground">Desired Yield</span>
