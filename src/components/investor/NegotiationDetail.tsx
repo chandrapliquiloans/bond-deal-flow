@@ -81,39 +81,49 @@ export function NegotiationDetail({ request, onBack }: NegotiationDetailProps) {
         </div>
       </div>
 
-      {/* Negotiation History */}
+      {/* Negotiation History - Sheet Trigger */}
       {request.negotiationRounds.length > 0 && (
-        <div className="card-elevated p-5">
-          <h2 className="text-sm font-semibold mb-3">Negotiation History</h2>
-          <div className="space-y-3">
-            {request.negotiationRounds.map((round) => (
-              <div
-                key={round.round}
-                className={`rounded-lg p-3 text-xs border ${
-                  round.proposedBy === "investor"
-                    ? "bg-accent/5 border-accent/20 ml-0 mr-8 sm:mr-16"
-                    : "bg-warning/5 border-warning/20 ml-8 sm:ml-16 mr-0"
-                }`}
-              >
-                <div className="flex justify-between mb-1">
-                  <span className="font-semibold capitalize">
-                    Round {round.round} – {round.proposedBy === "investor" ? "Your Proposal" : "Ops Counter"}
-                  </span>
-                  <span className="text-muted-foreground">
-                    {new Date(round.timestamp).toLocaleString()}
-                  </span>
+        <Sheet>
+          <SheetTrigger asChild>
+            <Button variant="outline" className="gap-2">
+              <MessageSquare className="h-4 w-4" />
+              View Negotiation History ({request.negotiationRounds.length} rounds)
+            </Button>
+          </SheetTrigger>
+          <SheetContent side="right" className="w-full sm:max-w-md overflow-y-auto">
+            <SheetHeader>
+              <SheetTitle>Negotiation History</SheetTitle>
+            </SheetHeader>
+            <div className="space-y-3 mt-4">
+              {request.negotiationRounds.map((round) => (
+                <div
+                  key={round.round}
+                  className={`rounded-lg p-3 text-xs border ${
+                    round.proposedBy === "investor"
+                      ? "bg-accent/5 border-accent/20"
+                      : "bg-warning/5 border-warning/20"
+                  }`}
+                >
+                  <div className="flex justify-between mb-1">
+                    <span className="font-semibold capitalize">
+                      Round {round.round} – {round.proposedBy === "investor" ? "Your Proposal" : "Ops Counter"}
+                    </span>
+                    <span className="text-muted-foreground">
+                      {new Date(round.timestamp).toLocaleString()}
+                    </span>
+                  </div>
+                  <div className="flex gap-4">
+                    <span>Yield: <strong>{round.yield}%</strong></span>
+                    <span>Price: <strong>₹{round.price}</strong></span>
+                  </div>
+                  <p className="text-muted-foreground mt-1">
+                    Deadline: {new Date(round.deadline).toLocaleString()}
+                  </p>
                 </div>
-                <div className="flex gap-4">
-                  <span>Yield: <strong>{round.yield}%</strong></span>
-                  <span>Price: <strong>₹{round.price}</strong></span>
-                </div>
-                <p className="text-muted-foreground mt-1">
-                  Deadline: {new Date(round.deadline).toLocaleString()}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
+              ))}
+            </div>
+          </SheetContent>
+        </Sheet>
       )}
 
       {/* Action: Respond to Ops proposal */}
