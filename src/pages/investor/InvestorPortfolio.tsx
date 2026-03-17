@@ -7,7 +7,7 @@ import { SellStepper } from "@/components/investor/SellStepper";
 
 export default function InvestorPortfolio() {
   const [sellModalOpen, setSellModalOpen] = useState(false);
-  const [selectedBondIsin, setSelectedBondIsin] = useState<string | null>(null);
+  const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
   const [sellType, setSellType] = useState<"internal" | "external">("internal");
 
   // Group by bond
@@ -18,8 +18,8 @@ export default function InvestorPortfolio() {
     return acc;
   }, {});
 
-  const handleSellInternal = (isin: string) => {
-    setSelectedBondIsin(isin);
+  const handleSellOrder = (orderId: string) => {
+    setSelectedOrderId(orderId);
     setSellType("internal");
     setSellModalOpen(true);
   };
@@ -83,7 +83,7 @@ export default function InvestorPortfolio() {
                     </div>
                   </div>
 
-                  {/* Orders table (desktop) / cards (mobile) */}
+                  {/* Orders table (desktop) */}
                   <div className="hidden sm:block">
                     <table className="w-full text-xs">
                       <thead>
@@ -92,6 +92,7 @@ export default function InvestorPortfolio() {
                           <th className="text-left py-2 font-medium">Purchase Date</th>
                           <th className="text-right py-2 font-medium">Price</th>
                           <th className="text-right py-2 font-medium">Available Units</th>
+                          <th className="text-right py-2 font-medium">Action</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -101,6 +102,15 @@ export default function InvestorPortfolio() {
                             <td className="py-2">{order.purchaseDate}</td>
                             <td className="py-2 text-right">₹{order.purchasePrice}</td>
                             <td className="py-2 text-right">{order.availableUnits}</td>
+                            <td className="py-2 text-right">
+                              <Button
+                                size="sm"
+                                onClick={() => handleSellOrder(order.orderId)}
+                                className="bg-accent text-accent-foreground hover:bg-accent/90 rounded-sm text-xs h-7 px-3"
+                              >
+                                Sell
+                              </Button>
+                            </td>
                           </tr>
                         ))}
                       </tbody>
@@ -110,7 +120,7 @@ export default function InvestorPortfolio() {
                   {/* Mobile cards */}
                   <div className="sm:hidden space-y-2">
                     {orders.map((order) => (
-                      <div key={order.orderId} className="bg-muted/50 rounded p-3 text-xs space-y-1">
+                      <div key={order.orderId} className="bg-muted/50 rounded p-3 text-xs space-y-2">
                         <div className="flex justify-between">
                           <span className="font-mono">{order.orderId}</span>
                           <span className="font-semibold">{order.availableUnits} units</span>
@@ -119,16 +129,16 @@ export default function InvestorPortfolio() {
                           <span>{order.purchaseDate}</span>
                           <span>₹{order.purchasePrice}</span>
                         </div>
+                        <Button
+                          size="sm"
+                          onClick={() => handleSellOrder(order.orderId)}
+                          className="w-full bg-accent text-accent-foreground hover:bg-accent/90 rounded-sm text-xs h-7"
+                        >
+                          Sell
+                        </Button>
                       </div>
                     ))}
                   </div>
-
-                  <Button
-                    onClick={() => handleSellInternal(isin)}
-                    className="bg-accent text-accent-foreground hover:bg-accent/90 rounded-sm text-sm"
-                  >
-                    Request Sell
-                  </Button>
                 </div>
               </div>
             );
@@ -139,10 +149,10 @@ export default function InvestorPortfolio() {
       {sellModalOpen && (
         <SellStepper
           type={sellType}
-          bondIsin={selectedBondIsin}
+          orderId={selectedOrderId}
           onClose={() => {
             setSellModalOpen(false);
-            setSelectedBondIsin(null);
+            setSelectedOrderId(null);
           }}
         />
       )}
