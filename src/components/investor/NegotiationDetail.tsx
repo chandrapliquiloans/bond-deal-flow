@@ -1,25 +1,70 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { SellRequest } from "@/types";
 import { StatusBadge } from "@/components/StatusBadge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { ArrowLeft, Clock, MessageSquare } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { ArrowLeft, Clock, MessageSquare, CalendarIcon } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { format, addDays, isWeekend } from "date-fns";
 
 interface NegotiationDetailProps {
   request: SellRequest;
   onBack: () => void;
 }
 
-export function NegotiationDetail({ request, onBack }: NegotiationDetailProps) {
+/** Returns a date that is `n` business days from today (skipping Sat/Sun) */
+function addBusinessDays(start: Date, days: number): Date {
+  let count = 0;
+  const result = new Date(start);
+  while (count < days) {
+    result.setDate(result.getDate() + 1);
+    if (!isWeekend(result)) count++;
+  }
+  return result;
+}
+
+export function NegotiationDetail({ request: initialRequest, onBack }: NegotiationDetailProps) {
+  const [request, setRequest] = useState(initialRequest);
   const [counterYield, setCounterYield] = useState("");
   const [settlementDate, setSettlementDate] = useState("");
   const [showSettlement, setShowSettlement] = useState(false);
+
+  // Accept dialog state
+  const [showAcceptDialog, setShowAcceptDialog] = useState(false);
+  const [acceptSettlementDate, setAcceptSettlementDate] = useState<Date | undefined>();
 
   const lastRound = request.negotiationRounds[request.negotiationRounds.length - 1];
   const isOpsProposal = lastRound?.proposedBy === "ops";
   const canRespond = request.status === "under_negotiation" && isOpsProposal;
   const needsSettlement = request.status === "accepted" && !request.settlementDate;
+
+  // Minimum date = T+2 business days from today
+  const minSettlementDate = useMemo(() => addBusinessDays(new Date(), 2), []);
+
+  const isDateDisabled = (date: Date) => {
+    return isWeekend(date) || date < minSettlementDate;
+  };
+
+  const handleAcceptConfirm = () => {
+    if (!acceptSettlementDate) return;
+    setRequest((prev) => ({
+      ...prev,
+      status: "accepted" as const,
+      settlementDate: format(acceptSettlementDate, "yyyy-MM-dd"),
+    }));
+    setShowAcceptDialog(false);
+  };
 
   return (
     <div className="space-y-5">
@@ -135,7 +180,10 @@ export function NegotiationDetail({ request, onBack }: NegotiationDetailProps) {
             You can accept, reject, or counter.
           </p>
           <div className="flex flex-wrap gap-3">
-            <Button className="bg-success text-success-foreground hover:bg-success/90 rounded-sm text-sm">
+            <Button
+              onClick={() => setShowAcceptDialog(true)}
+              className="bg-success text-success-foreground hover:bg-success/90 rounded-sm text-sm"
+            >
               Accept Proposal
             </Button>
             <Button variant="outline" className="border-destructive text-destructive hover:bg-destructive/10 rounded-sm text-sm">
@@ -166,30 +214,68 @@ export function NegotiationDetail({ request, onBack }: NegotiationDetailProps) {
         </div>
       )}
 
-      {/* Settlement date confirmation */}
-      {needsSettlement && (
-        <div className="card-elevated p-5 space-y-4 border-2 border-success/30">
-          <h2 className="text-sm font-semibold text-success">🎉 Order Accepted!</h2>
-          <p className="text-xs text-muted-foreground">
-            Please confirm your preferred settlement date to proceed.
-          </p>
-          <div className="flex gap-3 items-end">
-            <div className="space-y-1">
-              <label className="text-xs text-muted-foreground">Settlement Date</label>
-              <Input
-                type="date"
-                value={settlementDate}
-                onChange={(e) => setSettlementDate(e.target.value)}
-                className="rounded-sm text-sm"
-              />
-            </div>
-            <Button
-              className="bg-success text-success-foreground hover:bg-success/90 rounded-sm text-sm"
-              disabled={!settlementDate}
-            >
-              Confirm Settlement
-            </Button>
+      {/* Accept Confirmation Dialog */}
+      <Dialog open={showAcceptDialog} onOpenChange={setShowAcceptDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Accept Proposal</DialogTitle>
+            <DialogDescription>
+              You are accepting the Ops proposal of <strong>{lastRound?.yield}%</strong> yield at <strong>₹{lastRound?.price}</strong>. Please select a settlement date to proceed.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3 py-2">
+            <label className="text-sm font-medium">Settlement Date</label>
+            <p className="text-xs text-muted-foreground">
+              Must be at least T+2 business days (excluding Sat & Sun).
+              Earliest: {format(minSettlementDate, "dd MMM yyyy")}
+            </p>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "w-full justify-start text-left font-normal",
+                    !acceptSettlementDate && "text-muted-foreground"
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {acceptSettlementDate ? format(acceptSettlementDate, "PPP") : "Pick a date"}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={acceptSettlementDate}
+                  onSelect={setAcceptSettlementDate}
+                  disabled={isDateDisabled}
+                  initialFocus
+                  className={cn("p-3 pointer-events-auto")}
+                />
+              </PopoverContent>
+            </Popover>
           </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowAcceptDialog(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleAcceptConfirm}
+              disabled={!acceptSettlementDate}
+              className="bg-success text-success-foreground hover:bg-success/90"
+            >
+              Confirm & Accept
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Show accepted banner when status changed to accepted */}
+      {request.status === "accepted" && request.settlementDate && (
+        <div className="card-elevated p-5 space-y-2 border-2 border-success/30">
+          <h2 className="text-sm font-semibold text-success">🎉 Proposal Accepted!</h2>
+          <p className="text-xs text-muted-foreground">
+            Settlement date confirmed: <strong>{request.settlementDate}</strong>
+          </p>
         </div>
       )}
 
