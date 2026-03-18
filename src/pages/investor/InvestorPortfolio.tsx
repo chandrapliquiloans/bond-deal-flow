@@ -52,9 +52,20 @@ export default function InvestorPortfolio() {
   return (
     <PortalLayout role="investor">
       <div className="space-y-6">
-        <div>
-          <h1 className="text-xl font-semibold">My Holdings</h1>
-          <p className="text-sm text-muted-foreground">View and manage your bond holdings by bond</p>
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <h1 className="text-xl font-semibold">My Holdings</h1>
+            <p className="text-sm text-muted-foreground">View and manage your bond holdings by bond</p>
+          </div>
+          <Button
+            className="shrink-0 bg-blue-600 text-white hover:bg-blue-700 rounded-sm text-sm"
+            onClick={() => {
+              setSellType("external");
+              setSellModalOpen(true);
+            }}
+          >
+            External Sell
+          </Button>
         </div>
 
         {/* Search */}

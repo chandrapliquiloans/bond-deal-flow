@@ -78,14 +78,18 @@ export function SellStepper({ type, orderId, onClose }: SellStepperProps) {
     setConfirmed(true);
   };
 
-  // ─── EXTERNAL: Single modal (no stepper) ───
+  // ─── EXTERNAL: Right-side drawer ───
   if (type === "external") {
     return (
-      <div className="fixed inset-0 z-50 bg-foreground/50 flex items-center justify-center p-4">
-        <div className="bg-card w-full max-w-lg rounded-lg shadow-xl max-h-[90vh] overflow-y-auto">
+      <>
+        <div className="fixed inset-0 z-40 bg-foreground/40" onClick={onClose} />
+        <div className="fixed right-0 top-0 bottom-0 z-50 w-full max-w-lg bg-card shadow-xl animate-slide-in-right overflow-y-auto">
           {/* Header */}
-          <div className="flex items-center justify-between p-4 border-b border-border">
-            <h2 className="text-sm font-semibold">Sell External Bond</h2>
+          <div className="sticky top-0 bg-card z-10 flex items-center justify-between p-4 border-b border-border">
+            <div>
+              <h2 className="text-sm font-semibold">External Sell</h2>
+              <p className="text-xs text-muted-foreground">Create a quote for bonds purchased from other vendors</p>
+            </div>
             <button onClick={onClose} className="text-muted-foreground hover:text-foreground">
               <X className="h-5 w-5" />
             </button>
@@ -196,7 +200,7 @@ export function SellStepper({ type, orderId, onClose }: SellStepperProps) {
                     type="checkbox"
                     checked={disclaimerChecked}
                     onChange={(e) => setDisclaimerChecked(e.target.checked)}
-                    className="mt-0.5"
+                    className="mt-0.5 shrink-0"
                   />
                   <span className="text-xs text-muted-foreground leading-relaxed">
                     I confirm that the above details are correct. I understand that sell orders are
@@ -204,44 +208,48 @@ export function SellStepper({ type, orderId, onClose }: SellStepperProps) {
                     to the Terms of Service and understand the T-day termination policy.
                   </span>
                 </label>
+
+                <div className="flex gap-2 pt-2">
+                  <Button variant="outline" className="rounded-sm text-sm" onClick={onClose}>
+                    Cancel
+                  </Button>
+                  <Button
+                    className="flex-1 bg-blue-600 text-white hover:bg-blue-700 rounded-sm text-sm"
+                    disabled={!canSubmitExternal}
+                    onClick={handleConfirm}
+                  >
+                    Create Quote
+                  </Button>
+                </div>
               </>
             ) : (
-              <div className="text-center space-y-4 py-6">
-                <div className="mx-auto w-16 h-16 bg-success/10 rounded-full flex items-center justify-center animate-check-mark">
+              <div className="text-center space-y-4 py-10">
+                <div className="mx-auto w-16 h-16 bg-success/10 rounded-full flex items-center justify-center">
                   <Check className="h-8 w-8 text-success" />
                 </div>
                 <div className="space-y-1">
-                  <h3 className="text-lg font-semibold">Sell Request Submitted!</h3>
+                  <h3 className="text-lg font-semibold">Quote Created!</h3>
                   <p className="text-sm text-muted-foreground">
-                    Your request ID is <span className="font-mono font-semibold">SR-006</span>
+                    Your sell request has been submitted to the buyers.
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    Request ID: <span className="font-mono font-semibold">SR-EXT-001</span>
                   </p>
                 </div>
                 <div className="bg-accent/5 rounded p-3 text-xs text-muted-foreground">
-                  Our Team will review your request shortly. You'll receive updates via
-                  email and in-app notifications.
+                  Our team will review and match your quote with buyers shortly.
                 </div>
+                <Button
+                  className="bg-accent text-accent-foreground hover:bg-accent/90 rounded-sm text-sm"
+                  onClick={onClose}
+                >
+                  Done
+                </Button>
               </div>
             )}
           </div>
-
-          {/* Footer */}
-          <div className="flex items-center justify-end p-4 border-t border-border">
-            {confirmed ? (
-              <Button className="bg-accent text-accent-foreground hover:bg-accent/90 rounded-sm text-sm" onClick={onClose}>
-                Done
-              </Button>
-            ) : (
-              <Button
-                className="bg-accent text-accent-foreground hover:bg-accent/90 rounded-sm text-sm"
-                disabled={!canSubmitExternal}
-                onClick={handleConfirm}
-              >
-                Confirm Sell Request
-              </Button>
-            )}
-          </div>
         </div>
-      </div>
+      </>
     );
   }
 
