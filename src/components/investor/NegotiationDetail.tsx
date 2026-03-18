@@ -46,7 +46,7 @@ export function NegotiationDetail({ request: initialRequest, onBack }: Negotiati
 
   const lastRound = request.negotiationRounds[request.negotiationRounds.length - 1];
   const isOpsProposal = lastRound?.proposedBy === "ops";
-  const canRespond = request.status === "under_negotiation" && isOpsProposal;
+  const canRespond = request.status === "negotiation" && isOpsProposal;
   const needsSettlement = request.status === "accepted" && !request.settlementDate;
 
   // Minimum date = T+2 business days from today
@@ -60,7 +60,7 @@ export function NegotiationDetail({ request: initialRequest, onBack }: Negotiati
     if (!acceptSettlementDate) return;
     setRequest((prev) => ({
       ...prev,
-      status: "accepted" as const,
+      status: "seller_approved" as const,
       settlementDate: format(acceptSettlementDate, "yyyy-MM-dd"),
     }));
     setShowAcceptDialog(false);
@@ -81,7 +81,7 @@ export function NegotiationDetail({ request: initialRequest, onBack }: Negotiati
       </div>
 
       {/* T-day warning */}
-      {["submitted", "under_review", "under_negotiation"].includes(request.status) && (
+      {["sell_initiated", "negotiation", "buyer_approved"].includes(request.status) && (
         <div className="bg-warning/10 border border-warning/30 rounded-lg p-4 flex items-start gap-3">
           <Clock className="h-5 w-5 text-warning shrink-0 mt-0.5" />
           <div className="text-sm">
@@ -270,7 +270,7 @@ export function NegotiationDetail({ request: initialRequest, onBack }: Negotiati
       </Dialog>
 
       {/* Show accepted banner when status changed to accepted */}
-      {request.status === "accepted" && request.settlementDate && (
+      {request.status === "seller_approved" && request.settlementDate && (
         <div className="card-elevated p-5 space-y-2 border-2 border-success/30">
           <h2 className="text-sm font-semibold text-success">🎉 Proposal Accepted!</h2>
           <p className="text-xs text-muted-foreground">

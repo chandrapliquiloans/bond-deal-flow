@@ -21,7 +21,7 @@ export function OpsRequestDrawer({ request, onClose }: OpsRequestDrawerProps) {
   const [actionRemark, setActionRemark] = useState("");
   const [confirmed, setConfirmed] = useState(false);
 
-  const canNegotiate = ["submitted", "under_review", "under_negotiation"].includes(request.status);
+  const canNegotiate = ["sell_initiated", "negotiation", "buyer_approved"].includes(request.status);
 
   return (
     <>
@@ -67,7 +67,7 @@ export function OpsRequestDrawer({ request, onClose }: OpsRequestDrawerProps) {
               )}
               <span className="text-muted-foreground">Desired Yield</span>
               <span>{request.desiredYield}%</span>
-              <span className="text-muted-foreground">Txn Date</span>
+              <span className="text-muted-foreground">Settlement Date</span>
               <span>{request.transactionDate}</span>
               {request.dpAccountId && (
                 <>

@@ -150,7 +150,7 @@ export default function IFASell() {
                 <span>{units}</span>
                 <span className="text-muted-foreground">Yield</span>
                 <span>{desiredYield}%</span>
-                <span className="text-muted-foreground">Txn Date</span>
+                <span className="text-muted-foreground">Settlement Date</span>
                 <span>{transactionDate}</span>
               </div>
             </div>

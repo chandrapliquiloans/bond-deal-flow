@@ -20,7 +20,7 @@ export const MOCK_SELL_REQUESTS: SellRequest[] = [
   {
     id: "SR-001", investorName: "Nisha Sharma", investorId: "INV-001", bond: BONDS_CATALOG[0],
     source: "liquibonds", units: 20, desiredYield: 9.25, buyYield: 8.75, transactionDate: "2026-03-18",
-    status: "under_negotiation", createdAt: "2026-03-10T10:30:00", updatedAt: "2026-03-12T14:00:00",
+    status: "negotiation", createdAt: "2026-03-10T10:30:00", updatedAt: "2026-03-12T14:00:00",
     orderId: "ORD-001",
     negotiationRounds: [
       { round: 1, proposedBy: "investor", yield: 9.25, price: 1015, timestamp: "2026-03-10T10:30:00", deadline: "2026-03-12T10:30:00" },
@@ -30,14 +30,14 @@ export const MOCK_SELL_REQUESTS: SellRequest[] = [
   {
     id: "SR-002", investorName: "Rajesh Kumar", investorId: "INV-002", bond: BONDS_CATALOG[1],
     source: "liquibonds", units: 50, desiredYield: 8.10, buyYield: 7.85, transactionDate: "2026-03-20",
-    status: "submitted", createdAt: "2026-03-12T08:00:00", updatedAt: "2026-03-12T08:00:00",
+    status: "sell_initiated", createdAt: "2026-03-12T08:00:00", updatedAt: "2026-03-12T08:00:00",
     orderId: "ORD-002",
     negotiationRounds: [],
   },
   {
     id: "SR-003", investorName: "Priya Patel", investorId: "INV-003", bond: BONDS_CATALOG[2],
     source: "external", units: 15, desiredYield: 8.60, buyYield: 8.25, transactionDate: "2026-03-17",
-    status: "accepted", createdAt: "2026-03-08T14:00:00", updatedAt: "2026-03-11T16:00:00",
+    status: "buyer_approved", createdAt: "2026-03-08T14:00:00", updatedAt: "2026-03-11T16:00:00",
     orderId: "ORD-003",
     dpAccountId: "1234567890123456", settlementDate: "2026-03-17",
     negotiationRounds: [
@@ -57,7 +57,7 @@ export const MOCK_SELL_REQUESTS: SellRequest[] = [
   {
     id: "SR-005", investorName: "Sunita Reddy", investorId: "INV-005", bond: BONDS_CATALOG[4],
     source: "liquibonds", units: 40, desiredYield: 8.90, buyYield: 8.65, transactionDate: "2026-03-16",
-    status: "terminated", createdAt: "2026-03-03T09:00:00", updatedAt: "2026-03-13T00:00:00",
+    status: "rejected", createdAt: "2026-03-03T09:00:00", updatedAt: "2026-03-13T00:00:00",
     orderId: "ORD-005",
     negotiationRounds: [
       { round: 1, proposedBy: "investor", yield: 8.90, price: 1010, timestamp: "2026-03-03T09:00:00", deadline: "2026-03-05T09:00:00" },

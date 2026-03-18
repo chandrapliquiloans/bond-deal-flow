@@ -155,7 +155,7 @@ export function SellStepper({ type, orderId, onClose }: SellStepperProps) {
 
                 {/* Transaction Date */}
                 <div className="space-y-2">
-                  <Label className="text-sm">Transaction Date</Label>
+                  <Label className="text-sm">Settlement Date</Label>
                   <Input
                     type="date"
                     value={transactionDate}
@@ -217,7 +217,7 @@ export function SellStepper({ type, orderId, onClose }: SellStepperProps) {
                   </p>
                 </div>
                 <div className="bg-accent/5 rounded p-3 text-xs text-muted-foreground">
-                  Our Operations Team will review your request shortly. You'll receive updates via
+                  Our Team will review your request shortly. You'll receive updates via
                   email and in-app notifications.
                 </div>
               </div>
@@ -322,7 +322,7 @@ export function SellStepper({ type, orderId, onClose }: SellStepperProps) {
                 </div>
 
                 <div className="space-y-2">
-                  <Label className="text-sm">Transaction Date</Label>
+                  <Label className="text-sm">Settlement Date</Label>
                   <Input
                     type="date"
                     value={transactionDate}
@@ -384,7 +384,7 @@ export function SellStepper({ type, orderId, onClose }: SellStepperProps) {
                 </p>
               </div>
               <div className="bg-accent/5 rounded p-3 text-xs text-muted-foreground">
-                Our Operations Team will review your request shortly. You'll receive updates via
+                Our Team will review your request shortly. You'll receive updates via
                 email and in-app notifications.
               </div>
             </div>

@@ -2,12 +2,13 @@ import { SellRequestStatus } from "@/types";
 import { cn } from "@/lib/utils";
 
 const statusConfig: Record<SellRequestStatus, { label: string; className: string }> = {
-  submitted: { label: "Submitted", className: "bg-accent/10 text-accent" },
-  under_review: { label: "Under Review", className: "bg-accent/10 text-accent" },
-  under_negotiation: { label: "Negotiation", className: "bg-warning/10 text-warning" },
-  accepted: { label: "Accepted", className: "bg-success/10 text-success" },
+  sell_initiated: { label: "Sell Initiated", className: "bg-accent/10 text-accent" },
+  negotiation: { label: "Negotiation", className: "bg-warning/10 text-warning" },
+  buyer_approved: { label: "Buyer Approved", className: "bg-success/10 text-success" },
+  seller_approved: { label: "Seller Approved", className: "bg-success/10 text-success" },
   rejected: { label: "Rejected", className: "bg-destructive/10 text-destructive" },
-  executed: { label: "Executed", className: "bg-executed/10 text-executed" },
+  payment_done: { label: "Payment Done", className: "bg-executed/10 text-executed" },
+  processing: { label: "Processing", className: "bg-warning/10 text-warning" },
   settled: { label: "Settled", className: "bg-settled/10 text-settled" },
   terminated: { label: "Terminated", className: "bg-terminated/10 text-terminated" },
 };

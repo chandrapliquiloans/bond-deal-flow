@@ -1,12 +1,13 @@
 export type UserRole = "investor" | "ifa" | "ops";
 
 export type SellRequestStatus =
-  | "submitted"
-  | "under_review"
-  | "under_negotiation"
-  | "accepted"
+  | "sell_initiated"
+  | "negotiation"
+  | "buyer_approved"
+  | "seller_approved"
   | "rejected"
-  | "executed"
+  | "payment_done"
+  | "processing"
   | "settled"
   | "terminated";
 

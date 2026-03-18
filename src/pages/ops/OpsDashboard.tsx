@@ -11,10 +11,10 @@ export default function OpsDashboard() {
   const [selectedRequest, setSelectedRequest] = useState<SellRequest | null>(null);
 
   const newRequests = MOCK_SELL_REQUESTS.filter((r) =>
-    ["submitted", "under_review", "under_negotiation"].includes(r.status)
+    ["sell_initiated", "negotiation", "buyer_approved"].includes(r.status)
   );
   const todaysTrades = MOCK_SELL_REQUESTS.filter((r) =>
-    ["accepted", "executed"].includes(r.status)
+    ["seller_approved", "payment_done", "processing"].includes(r.status)
   );
 
   return (
@@ -38,7 +38,7 @@ export default function OpsDashboard() {
           <div className="card-elevated p-4 space-y-1">
             <p className="text-xs text-muted-foreground font-medium">Under Negotiation</p>
             <p className="text-2xl font-semibold text-warning">
-              {MOCK_SELL_REQUESTS.filter((r) => r.status === "under_negotiation").length}
+              {MOCK_SELL_REQUESTS.filter((r) => r.status === "negotiation").length}
             </p>
           </div>
           <div className="card-elevated p-4 space-y-1">
@@ -50,7 +50,7 @@ export default function OpsDashboard() {
         </div>
 
         {/* Urgent banners */}
-        {MOCK_SELL_REQUESTS.filter((r) => r.status === "under_negotiation").length > 0 && (
+        {MOCK_SELL_REQUESTS.filter((r) => r.status === "negotiation").length > 0 && (
           <div className="bg-warning/10 border border-warning/30 rounded-lg p-4 flex items-start gap-3">
             <AlertTriangle className="h-5 w-5 text-warning shrink-0" />
             <div className="text-sm">

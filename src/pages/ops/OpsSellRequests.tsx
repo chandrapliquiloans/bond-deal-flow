@@ -7,11 +7,13 @@ import { OpsRequestDrawer } from "@/components/ops/OpsRequestDrawer";
 
 const filterOptions: { label: string; value: SellRequestStatus | "all" }[] = [
   { label: "All", value: "all" },
-  { label: "Submitted", value: "submitted" },
-  { label: "Negotiation", value: "under_negotiation" },
-  { label: "Accepted", value: "accepted" },
+  { label: "Sell Initiated", value: "sell_initiated" },
+  { label: "Negotiation", value: "negotiation" },
+  { label: "Buyer Approved", value: "buyer_approved" },
+  { label: "Seller Approved", value: "seller_approved" },
   { label: "Rejected", value: "rejected" },
-  { label: "Executed", value: "executed" },
+  { label: "Payment Done", value: "payment_done" },
+  { label: "Processing", value: "processing" },
   { label: "Settled", value: "settled" },
   { label: "Terminated", value: "terminated" },
 ];
