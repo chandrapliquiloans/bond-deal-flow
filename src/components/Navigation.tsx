@@ -11,8 +11,9 @@ interface NavItem {
 
 const navItems: Record<UserRole, NavItem[]> = {
   investor: [
-    { label: "Transactions", path: "/investor/portfolio" },
+    { label: "Dashboard", path: "/investor/portfolio" },
     { label: "Sell Requests", path: "/investor/sell-requests" },
+    { label: "Transactions", path: "/investor/transactions" },
   ],
   ifa: [
     { label: "Clients", path: "/ifa/clients" },

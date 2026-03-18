@@ -1,57 +1,206 @@
+import { useState } from "react";
 import { PortalLayout } from "@/components/PortalLayout";
-import { MOCK_SELL_REQUESTS } from "@/data/mockData";
+import { MOCK_PORTFOLIO, MOCK_SELL_REQUESTS } from "@/data/mockData";
 import { StatusBadge } from "@/components/StatusBadge";
 
+type TxType = "all" | "buy" | "sell";
+
+interface UnifiedTransaction {
+  id: string;
+  type: "buy" | "sell";
+  bondName: string;
+  isin: string;
+  units: number;
+  price: number;
+  yield?: number;
+  date: string;
+  status: string;
+}
+
+const buyTransactions: UnifiedTransaction[] = MOCK_PORTFOLIO.map((o) => ({
+  id: o.orderId,
+  type: "buy",
+  bondName: o.bond.name,
+  isin: o.bond.isin,
+  units: o.units,
+  price: o.purchasePrice,
+  date: o.purchaseDate,
+  status: "settled",
+}));
+
+const sellTransactions: UnifiedTransaction[] = MOCK_SELL_REQUESTS.map((r) => ({
+  id: r.id,
+  type: "sell",
+  bondName: r.bond.name,
+  isin: r.bond.isin,
+  units: r.units,
+  price: r.bond.faceValue,
+  yield: r.desiredYield,
+  date: r.transactionDate,
+  status: "settled",
+}));
+
+const allTransactions: UnifiedTransaction[] = [
+  ...buyTransactions,
+  ...sellTransactions,
+].sort((a, b) => (a.date > b.date ? -1 : 1));
+
+const TYPE_TABS: { label: string; value: TxType }[] = [
+  { label: "All", value: "all" },
+  { label: "Buy", value: "buy" },
+  { label: "Sell", value: "sell" },
+];
+
 export default function InvestorTransactions() {
-  const completed = MOCK_SELL_REQUESTS.filter((r) =>
-    ["settled", "executed"].includes(r.status)
-  );
+  const [activeTab, setActiveTab] = useState<TxType>("all");
+
+  const filtered =
+    activeTab === "all"
+      ? allTransactions
+      : allTransactions.filter((t) => t.type === activeTab);
 
   return (
     <PortalLayout role="investor">
       <div className="space-y-5">
         <div>
-          <h1 className="text-xl font-semibold">Transaction History</h1>
-          <p className="text-sm text-muted-foreground">Completed and settled trades</p>
+          <h1 className="text-xl font-semibold">Transactions</h1>
+          <p className="text-sm text-muted-foreground">All buy and sell transactions</p>
         </div>
 
-        {completed.length === 0 ? (
-          <div className="text-center py-16 text-sm text-muted-foreground">
-            No completed transactions yet.
+        {/* Summary cards */}
+        <div className="grid grid-cols-3 gap-3">
+          <div className="card-elevated p-4 space-y-1">
+            <p className="text-xs text-muted-foreground">Total</p>
+            <p className="text-2xl font-semibold">{allTransactions.length}</p>
           </div>
-        ) : (
-          <div className="space-y-3">
-            {completed.map((req) => (
-              <div key={req.id} className="card-elevated p-4">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="space-y-1">
-                    <p className="text-sm font-medium">{req.bond.name}</p>
-                    <p className="text-xs text-muted-foreground font-mono">{req.id}</p>
-                  </div>
-                  <StatusBadge status={req.status} />
+          <div className="card-elevated p-4 space-y-1">
+            <p className="text-xs text-muted-foreground">Buy Orders</p>
+            <p className="text-2xl font-semibold text-success">{buyTransactions.length}</p>
+          </div>
+          <div className="card-elevated p-4 space-y-1">
+            <p className="text-xs text-muted-foreground">Sell Requests</p>
+            <p className="text-2xl font-semibold text-accent">{sellTransactions.length}</p>
+          </div>
+        </div>
+
+        {/* Type filter tabs */}
+        <div className="flex gap-2">
+          {TYPE_TABS.map((tab) => (
+            <button
+              key={tab.value}
+              onClick={() => setActiveTab(tab.value)}
+              className={`text-xs px-4 py-1.5 rounded-full border transition-colors ${
+                activeTab === tab.value
+                  ? "bg-accent text-accent-foreground border-accent"
+                  : "bg-card text-muted-foreground border-border hover:bg-muted"
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Desktop table */}
+        <div className="hidden md:block card-elevated overflow-hidden">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="bg-muted/50 text-xs text-muted-foreground">
+                <th className="text-left p-3 font-medium">ID</th>
+                <th className="text-left p-3 font-medium">Type</th>
+                <th className="text-left p-3 font-medium">Bond</th>
+                <th className="text-left p-3 font-medium">ISIN</th>
+                <th className="text-right p-3 font-medium">Units</th>
+                <th className="text-right p-3 font-medium">Price</th>
+                <th className="text-right p-3 font-medium">Yield</th>
+                <th className="text-left p-3 font-medium">Date</th>
+                <th className="text-left p-3 font-medium">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.map((tx) => (
+                <tr key={`${tx.type}-${tx.id}`} className="border-t border-border hover:bg-muted/30 transition-colors">
+                  <td className="p-3 font-mono text-xs">{tx.id}</td>
+                  <td className="p-3">
+                    <span
+                      className={`text-xs font-medium px-2 py-0.5 rounded-full ${
+                        tx.type === "buy"
+                          ? "bg-success/10 text-success"
+                          : "bg-accent/10 text-accent"
+                      }`}
+                    >
+                      {tx.type === "buy" ? "Buy" : "Sell"}
+                    </span>
+                  </td>
+                  <td className="p-3 text-xs max-w-[180px] truncate">{tx.bondName.split(" ").slice(0, 3).join(" ")}</td>
+                  <td className="p-3 font-mono text-xs text-muted-foreground">{tx.isin}</td>
+                  <td className="p-3 text-right text-xs">{tx.units}</td>
+                  <td className="p-3 text-right text-xs">₹{tx.price.toLocaleString()}</td>
+                  <td className="p-3 text-right text-xs">{tx.yield != null ? `${tx.yield}%` : "—"}</td>
+                  <td className="p-3 text-xs">{tx.date}</td>
+                  <td className="p-3">
+                    <StatusBadge status="settled" />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+
+          {filtered.length === 0 && (
+            <div className="text-center py-12 text-sm text-muted-foreground">
+              No transactions found.
+            </div>
+          )}
+        </div>
+
+        {/* Mobile cards */}
+        <div className="md:hidden space-y-3">
+          {filtered.map((tx) => (
+            <div key={`${tx.type}-${tx.id}`} className="card-elevated p-4 space-y-3">
+              <div className="flex items-start justify-between gap-2">
+                <div className="space-y-0.5">
+                  <p className="text-sm font-medium">{tx.bondName.split(" ").slice(0, 3).join(" ")}</p>
+                  <p className="text-xs font-mono text-muted-foreground">{tx.id}</p>
+                  <p className="text-xs font-mono text-muted-foreground">{tx.isin}</p>
                 </div>
-                <div className="mt-3 grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
-                  <div>
-                    <p className="text-muted-foreground">Units</p>
-                    <p className="font-medium">{req.units}</p>
-                  </div>
-                  <div>
-                    <p className="text-muted-foreground">Yield</p>
-                    <p className="font-medium">{req.desiredYield}%</p>
-                  </div>
-                  <div>
-                    <p className="text-muted-foreground">Settlement</p>
-                    <p className="font-medium">{req.settlementDate || "—"}</p>
-                  </div>
-                  <div>
-                    <p className="text-muted-foreground">UTR</p>
-                    <p className="font-mono font-medium text-[11px]">{req.utrNumber || "—"}</p>
-                  </div>
+                <div className="flex flex-col items-end gap-1">
+                  <span
+                    className={`text-xs font-medium px-2 py-0.5 rounded-full ${
+                      tx.type === "buy"
+                        ? "bg-success/10 text-success"
+                        : "bg-accent/10 text-accent"
+                    }`}
+                  >
+                    {tx.type === "buy" ? "Buy" : "Sell"}
+                  </span>
+                  <StatusBadge status="settled" />
                 </div>
               </div>
-            ))}
-          </div>
-        )}
+              <div className="grid grid-cols-3 gap-2 text-xs">
+                <div>
+                  <p className="text-muted-foreground">Units</p>
+                  <p className="font-medium">{tx.units}</p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground">Price</p>
+                  <p className="font-medium">₹{tx.price.toLocaleString()}</p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground">{tx.type === "sell" ? "Yield" : "Date"}</p>
+                  <p className="font-medium">{tx.type === "sell" && tx.yield != null ? `${tx.yield}%` : tx.date}</p>
+                </div>
+              </div>
+              {tx.type === "buy" && (
+                <p className="text-xs text-muted-foreground">Date: {tx.date}</p>
+              )}
+            </div>
+          ))}
+
+          {filtered.length === 0 && (
+            <div className="text-center py-12 text-sm text-muted-foreground">
+              No transactions found.
+            </div>
+          )}
+        </div>
       </div>
     </PortalLayout>
   );
