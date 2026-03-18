@@ -8,7 +8,7 @@ export default function LoginPage() {
   const [phone, setPhone] = useState("");
   const [otpSent, setOtpSent] = useState(false);
   const [otp, setOtp] = useState("");
-  const [role, setRole] = useState<"investor" | "ifa" | "ops">("investor");
+  const [role, setRole] = useState<"investor" | "ops">("investor");
   const navigate = useNavigate();
 
   const handleSendOtp = () => {
@@ -58,7 +58,7 @@ export default function LoginPage() {
             <div className="space-y-2">
               <Label className="text-xs text-slate-500">Login as (Demo)</Label>
               <div className="flex gap-2">
-                {(["investor", "ifa", "ops"] as const).map((r) => (
+                {(["investor", "ops"] as const).map((r) => (
                   <button
                     key={r}
                     onClick={() => setRole(r)}
@@ -68,7 +68,7 @@ export default function LoginPage() {
                         : "bg-secondary text-secondary-foreground border-border hover:bg-muted"
                     }`}
                   >
-                    {r === "ifa" ? "IFA" : r.charAt(0).toUpperCase() + r.slice(1)}
+                    {r.charAt(0).toUpperCase() + r.slice(1)}
                   </button>
                 ))}
               </div>
