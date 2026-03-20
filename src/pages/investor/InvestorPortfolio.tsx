@@ -1,11 +1,29 @@
 import { useState, useMemo } from "react";
 import { PortalLayout } from "@/components/PortalLayout";
-import { MOCK_PORTFOLIO } from "@/data/mockData";
+import { MOCK_PORTFOLIO, MOCK_SELL_REQUESTS } from "@/data/mockData";
 import { PurchaseOrder } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { SellStepper } from "@/components/investor/SellStepper";
 import { X } from "lucide-react";
+
+const ACTIVE_STATUSES = ["sell_initiated", "negotiation", "buyer_approved", "seller_approved", "payment_done", "processing"];
+
+function getBlockedUnits(orderId: string): number {
+  return MOCK_SELL_REQUESTS
+    .filter((r) => r.orderId === orderId && ACTIVE_STATUSES.includes(r.status))
+    .reduce((sum, r) => sum + r.units, 0);
+}
+
+function getSoldUnits(orderId: string): number {
+  return MOCK_SELL_REQUESTS
+    .filter((r) => r.orderId === orderId && r.status === "settled")
+    .reduce((sum, r) => sum + r.units, 0);
+}
+
+function getAvailableUnits(order: PurchaseOrder): number {
+  return Math.max(0, order.units - getBlockedUnits(order.orderId) - getSoldUnits(order.orderId));
+}
 
 export default function InvestorPortfolio() {
   const [search, setSearch] = useState("");
@@ -83,8 +101,9 @@ export default function InvestorPortfolio() {
           {filteredBonds.map(([isin, orders]) => {
             const bond = orders[0].bond;
             const totalUnits = orders.reduce((sum, o) => sum + o.units, 0);
-            const totalAvailable = orders.reduce((sum, o) => sum + o.availableUnits, 0);
-            const totalSold = totalUnits - totalAvailable;
+            const totalAvailable = orders.reduce((sum, o) => sum + getAvailableUnits(o), 0);
+            const totalBlocked = orders.reduce((sum, o) => sum + getBlockedUnits(o.orderId), 0);
+            const totalSold = orders.reduce((sum, o) => sum + getSoldUnits(o.orderId), 0);
 
             return (
               <button
@@ -97,18 +116,22 @@ export default function InvestorPortfolio() {
                   <p className="text-xs text-muted-foreground font-mono">{isin}</p>
                 </div>
 
-                <div className="grid grid-cols-3 gap-2 text-xs">
+                <div className="grid grid-cols-2 gap-2 text-xs">
                   <div>
                     <p className="text-muted-foreground">Total</p>
                     <p className="font-semibold">{totalUnits}</p>
                   </div>
                   <div>
-                    <p className="text-muted-foreground">Sold</p>
-                    <p className="font-semibold">{totalSold}</p>
-                  </div>
-                  <div>
                     <p className="text-muted-foreground">Available</p>
                     <p className="font-semibold text-success">{totalAvailable}</p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Blocked</p>
+                    <p className="font-semibold text-warning">{totalBlocked}</p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Sold</p>
+                    <p className="font-semibold">{totalSold}</p>
                   </div>
                 </div>
 
@@ -160,9 +183,9 @@ export default function InvestorPortfolio() {
 
             {/* Summary */}
             <div className="p-4 border-b border-border space-y-2">
-              <div className="grid grid-cols-3 gap-2 text-xs">
+              <div className="grid grid-cols-4 gap-2 text-xs">
                 <div>
-                  <p className="text-muted-foreground">Total Units</p>
+                  <p className="text-muted-foreground">Total</p>
                   <p className="font-semibold text-lg">
                     {selectedBondOrders.reduce((sum, o) => sum + o.units, 0)}
                   </p>
@@ -170,13 +193,19 @@ export default function InvestorPortfolio() {
                 <div>
                   <p className="text-muted-foreground">Available</p>
                   <p className="font-semibold text-lg text-success">
-                    {selectedBondOrders.reduce((sum, o) => sum + o.availableUnits, 0)}
+                    {selectedBondOrders.reduce((sum, o) => sum + getAvailableUnits(o), 0)}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground">Blocked</p>
+                  <p className="font-semibold text-lg text-warning">
+                    {selectedBondOrders.reduce((sum, o) => sum + getBlockedUnits(o.orderId), 0)}
                   </p>
                 </div>
                 <div>
                   <p className="text-muted-foreground">Sold</p>
                   <p className="font-semibold text-lg">
-                    {selectedBondOrders.reduce((sum, o) => sum + (o.units - o.availableUnits), 0)}
+                    {selectedBondOrders.reduce((sum, o) => sum + getSoldUnits(o.orderId), 0)}
                   </p>
                 </div>
               </div>
@@ -186,7 +215,9 @@ export default function InvestorPortfolio() {
             <div className="p-4 space-y-3">
               <h3 className="text-sm font-semibold">Order Items</h3>
               {selectedBondOrders.map((order) => {
-                const soldUnits = order.units - order.availableUnits;
+                const blockedUnits = getBlockedUnits(order.orderId);
+                const soldUnits = getSoldUnits(order.orderId);
+                const availableUnits = getAvailableUnits(order);
                 return (
                   <div
                     key={order.orderId}
@@ -203,14 +234,18 @@ export default function InvestorPortfolio() {
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-3 gap-2">
+                    <div className="grid grid-cols-4 gap-2">
                       <div>
-                        <p className="text-muted-foreground">Total Qty</p>
+                        <p className="text-muted-foreground">Total</p>
                         <p className="font-semibold">{order.units}</p>
                       </div>
                       <div>
                         <p className="text-muted-foreground">Available</p>
-                        <p className="font-semibold text-success">{order.availableUnits}</p>
+                        <p className="font-semibold text-success">{availableUnits}</p>
+                      </div>
+                      <div>
+                        <p className="text-muted-foreground">Blocked</p>
+                        <p className="font-semibold text-warning">{blockedUnits}</p>
                       </div>
                       <div>
                         <p className="text-muted-foreground">Sold</p>
@@ -222,7 +257,7 @@ export default function InvestorPortfolio() {
                       <span className="text-muted-foreground">
                         Price: ₹{order.purchasePrice}
                       </span>
-                      {order.availableUnits > 0 && (
+                      {availableUnits > 0 && (
                         <Button
                           size="sm"
                           onClick={() => handleSellOrder(order.orderId)}
@@ -231,7 +266,7 @@ export default function InvestorPortfolio() {
                           Sell
                         </Button>
                       )}
-                      {order.availableUnits === 0 && (
+                      {availableUnits === 0 && (
                         <span className="text-xs text-muted-foreground">Fully Sold</span>
                       )}
                     </div>

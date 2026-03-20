@@ -3,7 +3,19 @@ import { X, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { MOCK_PORTFOLIO, BONDS_CATALOG } from "@/data/mockData";
+import { MOCK_PORTFOLIO, BONDS_CATALOG, MOCK_SELL_REQUESTS } from "@/data/mockData";
+
+const ACTIVE_STATUSES = ["sell_initiated", "negotiation", "buyer_approved", "seller_approved", "payment_done", "processing"];
+
+function computeAvailableUnits(orderId: string, totalUnits: number): number {
+  const blocked = MOCK_SELL_REQUESTS
+    .filter((r) => r.orderId === orderId && ACTIVE_STATUSES.includes(r.status))
+    .reduce((sum, r) => sum + r.units, 0);
+  const sold = MOCK_SELL_REQUESTS
+    .filter((r) => r.orderId === orderId && r.status === "settled")
+    .reduce((sum, r) => sum + r.units, 0);
+  return Math.max(0, totalUnits - blocked - sold);
+}
 import { Bond } from "@/types";
 import { addWorkingDays, formatDate, isWorkingDay, nextWorkingDay } from "@/lib/utils";
 
@@ -17,6 +29,7 @@ export function SellStepper({ type, orderId, onClose }: SellStepperProps) {
   // Internal sell modal state
 
   const order = orderId ? MOCK_PORTFOLIO.find((o) => o.orderId === orderId) : undefined;
+  const availableUnits = order ? computeAvailableUnits(order.orderId, order.units) : 0;
   const [unitsToSell, setUnitsToSell] = useState(0);
 
   // External sell state (single modal, no steps)
@@ -62,7 +75,7 @@ export function SellStepper({ type, orderId, onClose }: SellStepperProps) {
 
   const canSubmitInternal =
     unitsToSell > 0 &&
-    unitsToSell <= (order?.availableUnits ?? 0) &&
+    unitsToSell <= (availableUnits) &&
     yieldValid &&
     transactionDateValid &&
     disclaimerChecked;
@@ -117,10 +130,13 @@ export function SellStepper({ type, orderId, onClose }: SellStepperProps) {
                     <div className="bg-muted/50 rounded p-3 text-xs space-y-1">
                       <p className="font-semibold">{selectedBond.name}</p>
                       <div className="grid grid-cols-2 gap-2 text-muted-foreground">
-                        <span>Coupon: {selectedBond.couponRate}%</span>
                         <span>Rating: {selectedBond.creditRating}</span>
                         <span>Maturity: {selectedBond.maturityDate}</span>
                         <span>Face Value: ₹{selectedBond.faceValue}</span>
+                      </div>
+                      <div className="mt-1.5 pt-1.5 border-t border-border/40 flex gap-2 items-center">
+                        <span className="text-muted-foreground">Purchase Yield (Coupon):</span>
+                        <span className="font-semibold text-success">{selectedBond.couponRate}%</span>
                       </div>
                     </div>
                   )}
@@ -189,7 +205,7 @@ export function SellStepper({ type, orderId, onClose }: SellStepperProps) {
                     </p>
                   )}
                   <div className="bg-warning/10 border border-warning/30 rounded p-3 text-xs text-warning">
-                    <strong>⚠ T-Day Warning:</strong> If negotiation is not resolved by the transaction
+                    <strong>⚠ T-Day Warning:</strong> If negotiation is not resolved by the Settlement
                     date, the order will be automatically terminated at 00:00 IST.
                   </div>
                 </div>
@@ -204,7 +220,7 @@ export function SellStepper({ type, orderId, onClose }: SellStepperProps) {
                   />
                   <span className="text-xs text-muted-foreground leading-relaxed">
                     I confirm that the above details are correct. I understand that sell orders are
-                    subject to market conditions and negotiation with LiquiBonds Operations. I agree
+                    subject to market conditions and negotiation with buyers. I agree
                     to the Terms of Service and understand the T-day termination policy.
                   </span>
                 </label>
@@ -282,30 +298,34 @@ export function SellStepper({ type, orderId, onClose }: SellStepperProps) {
                     </div>
                     <div className="flex gap-4 mt-1 text-muted-foreground">
                       <span>Total Units: {order.units}</span>
-                      <span>Available: {order.availableUnits}</span>
-                      <span>Sold: {order.units - order.availableUnits}</span>
+                      <span>Available: {availableUnits}</span>
+                      <span>Sold: {order.units - availableUnits}</span>
+                    </div>
+                    <div className="mt-1.5 pt-1.5 border-t border-border/40 flex gap-2 items-center">
+                      <span className="text-muted-foreground">Purchase Yield:</span>
+                      <span className="font-semibold text-success">{order.bond.couponRate}%</span>
                     </div>
                   </div>
 
                   <div className="space-y-2">
-                    <Label className="text-sm">Units to Sell (max {order.availableUnits})</Label>
+                    <Label className="text-sm">Units to Sell (max {availableUnits})</Label>
                     <Input
                       type="number"
                       min={1}
-                      max={order.availableUnits}
+                      max={availableUnits}
                       value={unitsToSell || ""}
                       onChange={(e) => {
                         const val = Math.min(
                           Math.max(0, parseInt(e.target.value) || 0),
-                          order.availableUnits
+                          availableUnits
                         );
                         setUnitsToSell(val);
                       }}
                       className="rounded-sm"
-                      placeholder={`1 – ${order.availableUnits}`}
+                      placeholder={`1 – ${availableUnits}`}
                     />
-                    {unitsToSell > order.availableUnits && (
-                      <p className="text-xs text-destructive">Cannot exceed {order.availableUnits} units</p>
+                    {unitsToSell > availableUnits && (
+                      <p className="text-xs text-destructive">Cannot exceed {availableUnits} units</p>
                     )}
                   </div>
                 </div>
@@ -360,7 +380,7 @@ export function SellStepper({ type, orderId, onClose }: SellStepperProps) {
                     </p>
                   )}
                   <div className="bg-warning/10 border border-warning/30 rounded p-3 text-xs text-warning">
-                    <strong>⚠ T-Day Warning:</strong> If negotiation is not resolved by the transaction
+                    <strong>⚠ T-Day Warning:</strong> If negotiation is not resolved by the Settlement
                     date, the order will be automatically terminated at 00:00 IST.
                   </div>
                 </div>
@@ -375,7 +395,7 @@ export function SellStepper({ type, orderId, onClose }: SellStepperProps) {
                 />
                 <span className="text-xs text-muted-foreground leading-relaxed">
                   I confirm that the above details are correct. I understand that sell orders are
-                  subject to market conditions and negotiation with LiquiBonds Operations. I agree
+                  subject to market conditions and negotiation with buyer. I agree
                   to the Terms of Service and understand the T-day termination policy.
                 </span>
               </label>

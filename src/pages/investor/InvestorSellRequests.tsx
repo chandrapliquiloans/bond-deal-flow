@@ -116,12 +116,8 @@ function ActionModal({ modalState, requests, onClose, onSubmit, onRemarkChange }
                   <option>Net Banking</option>
                 </select>
               </div>
-              <div className="space-y-2">
-                <Label className="text-sm">UTR/Reference Number</Label>
-                <Input
-                  placeholder="Enter UTR/Reference number"
-                  className="text-sm rounded-sm"
-                />
+              <div className="bg-muted/50 rounded p-3 text-xs text-muted-foreground">
+                UTR will be assigned by the buyer (LiquiBonds Ops) after payment confirmation.
               </div>
             </div>
           )}
@@ -129,6 +125,13 @@ function ActionModal({ modalState, requests, onClose, onSubmit, onRemarkChange }
           {/* View Details */}
           {modalState.action === "View Details" && (
             <div className="space-y-3">
+              {request.status === "settled" && request.utrNumber && (
+                <div className="bg-settled/10 border border-settled/30 rounded p-3 space-y-1">
+                  <p className="text-xs font-semibold text-settled">✅ Trade Settled</p>
+                  <p className="text-xs text-muted-foreground">UTR Number</p>
+                  <p className="text-sm font-mono font-semibold">{request.utrNumber}</p>
+                </div>
+              )}
               <div className="bg-muted/50 rounded p-3 text-xs space-y-2">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Settlement Date:</span>
@@ -136,11 +139,11 @@ function ActionModal({ modalState, requests, onClose, onSubmit, onRemarkChange }
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">UTR Number:</span>
-                  <span>{request.utrNumber || "Pending"}</span>
+                  <span className="font-mono">{request.utrNumber || "Pending"}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">RFQ Number:</span>
-                  <span>{request.rfqNumber || "Pending"}</span>
+                  <span className="font-mono">{request.rfqNumber || "Pending"}</span>
                 </div>
               </div>
             </div>
@@ -157,14 +160,14 @@ function ActionModal({ modalState, requests, onClose, onSubmit, onRemarkChange }
             >
               Cancel
             </Button>
-            <Button
-              onClick={onSubmit}
-              className="flex-1 text-sm rounded-sm bg-accent text-accent-foreground hover:bg-accent/90"
-            >
-              {modalState.action === "Make Payment" ? "Complete Payment" :
-               modalState.action === "View Details" ? "Close" :
-               `Confirm ${modalState.action}`}
-            </Button>
+            {modalState.action !== "View Details" && (
+              <Button
+                onClick={onSubmit}
+                className="flex-1 text-sm rounded-sm bg-accent text-accent-foreground hover:bg-accent/90"
+              >
+                {modalState.action === "Make Payment" ? "Complete Payment" : `Confirm ${modalState.action}`}
+              </Button>
+            )}
           </div>
         </div>
       </div>
@@ -252,6 +255,8 @@ function NegotiationModal({ request, onClose, onConfirm }: NegotiationModalProps
                   <span className="font-mono">{request.bond.isin}</span>
                   <span className="text-muted-foreground">Units</span>
                   <span>{request.units}</span>
+                  <span className="text-muted-foreground">Purchase Yield</span>
+                  <span className="font-semibold text-success">{request.buyYield ?? request.bond.couponRate}%</span>
                   <span className="text-muted-foreground">Your Desired Yield</span>
                   <span>{request.desiredYield}%</span>
                   <span className="text-muted-foreground">Settlement Date</span>
@@ -272,18 +277,30 @@ function NegotiationModal({ request, onClose, onConfirm }: NegotiationModalProps
                           : "bg-warning/5 border-warning/20"
                       }`}
                     >
-                      <div className="flex justify-between mb-1">
-                        <span className="font-medium">
-                          Round {round.round} — {round.proposedBy === "investor" ? "Your Quote" : "Buyer Counter"}
-                        </span>
+                      <div className="flex justify-between mb-1.5">
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium">Round {round.round}</span>
+                          <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-semibold ${
+                            round.proposedBy === "investor"
+                              ? "bg-accent/20 text-accent"
+                              : "bg-warning/20 text-warning"
+                          }`}>
+                            {round.proposedBy === "investor" ? "You" : "Buyer"}
+                          </span>
+                        </div>
                         <span className="text-muted-foreground">
                           {new Date(round.timestamp).toLocaleString()}
                         </span>
                       </div>
-                      <div className="flex gap-4">
+                      <div className="flex gap-4 mb-1">
                         <span>Yield: <strong>{round.yield}%</strong></span>
                         <span>Price: <strong>₹{round.price}</strong></span>
                       </div>
+                      {round.note && (
+                        <p className="text-muted-foreground italic mt-1 border-t border-border/40 pt-1">
+                          "{round.note}"
+                        </p>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -312,7 +329,7 @@ function NegotiationModal({ request, onClose, onConfirm }: NegotiationModalProps
                       <X className="h-4 w-4" /> Reject
                     </Button>
                     <Button
-                      className="flex-1 bg-warning text-warning-foreground hover:bg-warning/90 rounded-sm text-sm gap-1"
+                      className="flex-1 bg-accent text-accent-foreground hover:bg-accent/90 rounded-sm text-sm gap-1"
                       onClick={() => setAction("counter")}
                     >
                       <ArrowLeftRight className="h-4 w-4" /> Counter
@@ -416,7 +433,7 @@ function NegotiationModal({ request, onClose, onConfirm }: NegotiationModalProps
                       Back
                     </Button>
                     <Button
-                      className="flex-1 bg-warning text-warning-foreground hover:bg-warning/90 rounded-sm text-sm"
+                      className="flex-1 bg-accent text-accent-foreground hover:bg-accent/90 rounded-sm text-sm"
                       disabled={!counterYieldValid}
                       onClick={handleConfirm}
                     >
@@ -733,7 +750,12 @@ export default function InvestorSellRequests() {
                   <td className="p-3 text-right">{req.units}</td>
                   <td className="p-3 text-right">{req.desiredYield}%</td>
                   <td className="p-3 text-xs">{req.transactionDate}</td>
-                  <td className="p-3"><StatusBadge status={req.status} /></td>
+                  <td className="p-3">
+                    <StatusBadge status={req.status} />
+                    {req.status === "settled" && req.utrNumber && (
+                      <p className="text-xs font-mono text-muted-foreground mt-1">{req.utrNumber}</p>
+                    )}
+                  </td>
                   <td className="p-3 text-right">
                     {getActionButtons(req)}
                   </td>
@@ -753,7 +775,12 @@ export default function InvestorSellRequests() {
                   <p className="text-xs font-mono text-muted-foreground">{req.id}</p>
                   <p className="text-xs text-muted-foreground">Order: {req.orderId || "-"}</p>
                 </div>
-                <StatusBadge status={req.status} />
+                <div className="flex flex-col items-end gap-1">
+                  <StatusBadge status={req.status} />
+                  {req.status === "settled" && req.utrNumber && (
+                    <p className="text-xs font-mono text-muted-foreground">{req.utrNumber}</p>
+                  )}
+                </div>
               </div>
               <div className="flex gap-4 text-xs text-muted-foreground">
                 <span>{req.units} units</span>

@@ -8,7 +8,7 @@ const statusConfig: Record<SellRequestStatus, { label: string; className: string
   seller_approved: { label: "Seller Approved", className: "bg-success/10 text-success" },
   rejected: { label: "Rejected", className: "bg-destructive/10 text-destructive" },
   payment_done: { label: "Payment Done", className: "bg-executed/10 text-executed" },
-  processing: { label: "Processing", className: "bg-warning/10 text-warning" },
+  processing: { label: "InProgress", className: "bg-warning/10 text-warning" },
   settled: { label: "Settled", className: "bg-settled/10 text-settled" },
   terminated: { label: "Terminated", className: "bg-terminated/10 text-terminated" },
 };

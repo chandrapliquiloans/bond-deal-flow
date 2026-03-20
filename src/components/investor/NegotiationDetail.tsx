@@ -16,7 +16,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { ArrowLeft, Clock, MessageSquare, CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { format, addDays, isWeekend } from "date-fns";
+import { format, isWeekend } from "date-fns";
 
 interface NegotiationDetailProps {
   request: SellRequest;
@@ -37,8 +37,6 @@ function addBusinessDays(start: Date, days: number): Date {
 export function NegotiationDetail({ request: initialRequest, onBack }: NegotiationDetailProps) {
   const [request, setRequest] = useState(initialRequest);
   const [counterYield, setCounterYield] = useState("");
-  const [settlementDate, setSettlementDate] = useState("");
-  const [showSettlement, setShowSettlement] = useState(false);
 
   // Accept dialog state
   const [showAcceptDialog, setShowAcceptDialog] = useState(false);
@@ -47,7 +45,6 @@ export function NegotiationDetail({ request: initialRequest, onBack }: Negotiati
   const lastRound = request.negotiationRounds[request.negotiationRounds.length - 1];
   const isOpsProposal = lastRound?.proposedBy === "ops";
   const canRespond = request.status === "negotiation" && isOpsProposal;
-  const needsSettlement = request.status === "accepted" && !request.settlementDate;
 
   // Minimum date = T+2 business days from today
   const minSettlementDate = useMemo(() => addBusinessDays(new Date(), 2), []);
@@ -110,6 +107,10 @@ export function NegotiationDetail({ request: initialRequest, onBack }: Negotiati
             <p className="font-medium capitalize">{request.source}</p>
           </div>
           <div>
+            <p className="text-muted-foreground">Purchase Yield</p>
+            <p className="font-medium text-success">{request.buyYield ?? request.bond.couponRate}%</p>
+          </div>
+          <div>
             <p className="text-muted-foreground">Desired Yield</p>
             <p className="font-medium">{request.desiredYield}%</p>
           </div>
@@ -149,21 +150,33 @@ export function NegotiationDetail({ request: initialRequest, onBack }: Negotiati
                       : "bg-warning/5 border-warning/20"
                   }`}
                 >
-                  <div className="flex justify-between mb-1">
-                    <span className="font-semibold capitalize">
-                      Round {round.round} – {round.proposedBy === "investor" ? "Your Proposal" : "Ops Counter"}
-                    </span>
+                  <div className="flex justify-between mb-1.5">
+                    <div className="flex items-center gap-2">
+                      <span className="font-semibold">Round {round.round}</span>
+                      <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-semibold ${
+                        round.proposedBy === "investor"
+                          ? "bg-accent/20 text-accent"
+                          : "bg-warning/20 text-warning"
+                      }`}>
+                        {round.proposedBy === "investor" ? "You" : "Ops"}
+                      </span>
+                    </div>
                     <span className="text-muted-foreground">
                       {new Date(round.timestamp).toLocaleString()}
                     </span>
                   </div>
-                  <div className="flex gap-4">
+                  <div className="flex gap-4 mb-1">
                     <span>Yield: <strong>{round.yield}%</strong></span>
                     <span>Price: <strong>₹{round.price}</strong></span>
                   </div>
-                  <p className="text-muted-foreground mt-1">
+                  <p className="text-muted-foreground">
                     Deadline: {new Date(round.deadline).toLocaleString()}
                   </p>
+                  {round.note && (
+                    <p className="text-muted-foreground italic mt-1.5 border-t border-border/40 pt-1.5">
+                      "{round.note}"
+                    </p>
+                  )}
                 </div>
               ))}
             </div>

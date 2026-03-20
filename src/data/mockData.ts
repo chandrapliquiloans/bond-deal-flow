@@ -23,8 +23,8 @@ export const MOCK_SELL_REQUESTS: SellRequest[] = [
     status: "negotiation", createdAt: "2026-03-10T10:30:00", updatedAt: "2026-03-12T14:00:00",
     orderId: "ORD-001",
     negotiationRounds: [
-      { round: 1, proposedBy: "investor", yield: 9.25, price: 1015, timestamp: "2026-03-10T10:30:00", deadline: "2026-03-12T10:30:00" },
-      { round: 2, proposedBy: "ops", yield: 9.50, price: 1008, timestamp: "2026-03-11T09:00:00", deadline: "2026-03-13T09:00:00" },
+      { round: 1, proposedBy: "investor", yield: 9.25, price: 1015, timestamp: "2026-03-10T10:30:00", deadline: "2026-03-12T10:30:00", note: "Initiating sell at desired yield." },
+      { round: 2, proposedBy: "ops", yield: 9.50, price: 1008, timestamp: "2026-03-11T09:00:00", deadline: "2026-03-13T09:00:00", note: "Counter with higher yield based on current market rates." },
     ],
   },
   {
@@ -60,9 +60,9 @@ export const MOCK_SELL_REQUESTS: SellRequest[] = [
     status: "rejected", createdAt: "2026-03-03T09:00:00", updatedAt: "2026-03-13T00:00:00",
     orderId: "ORD-005",
     negotiationRounds: [
-      { round: 1, proposedBy: "investor", yield: 8.90, price: 1010, timestamp: "2026-03-03T09:00:00", deadline: "2026-03-05T09:00:00" },
-      { round: 2, proposedBy: "ops", yield: 9.20, price: 998, timestamp: "2026-03-04T15:00:00", deadline: "2026-03-06T15:00:00" },
-      { round: 3, proposedBy: "investor", yield: 9.05, price: 1004, timestamp: "2026-03-06T10:00:00", deadline: "2026-03-08T10:00:00" },
+      { round: 1, proposedBy: "investor", yield: 8.90, price: 1010, timestamp: "2026-03-03T09:00:00", deadline: "2026-03-05T09:00:00", note: "Initial sell request at market rate." },
+      { round: 2, proposedBy: "ops", yield: 9.20, price: 998, timestamp: "2026-03-04T15:00:00", deadline: "2026-03-06T15:00:00", note: "Adjusted yield to reflect liquidity constraints." },
+      { round: 3, proposedBy: "investor", yield: 9.05, price: 1004, timestamp: "2026-03-06T10:00:00", deadline: "2026-03-08T10:00:00", note: "Compromise offer — final counter." },
     ],
   },
 ];
