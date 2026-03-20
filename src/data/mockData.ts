@@ -20,7 +20,7 @@ export const MOCK_PORTFOLIO: PurchaseOrder[] = [
   { orderId: "ORD-001", bond: BONDS_CATALOG[0], units: 50, purchaseDate: "2024-03-15", purchasePrice: 1020, availableUnits: 50 },
   { orderId: "ORD-002", bond: BONDS_CATALOG[0], units: 30, purchaseDate: "2024-06-20", purchasePrice: 1015, availableUnits: 30 },
   { orderId: "ORD-003", bond: BONDS_CATALOG[1], units: 100, purchaseDate: "2024-01-10", purchasePrice: 995, availableUnits: 100 },
-  { orderId: "ORD-004", bond: BONDS_CATALOG[2], units: 25, purchaseDate: "2025-01-05", purchasePrice: 1010, availableUnits: 25 },
+  { orderId: "ORD-004", bond: BONDS_CATALOG[2], units: 30, purchaseDate: "2025-01-05", purchasePrice: 1010, availableUnits: 25 },
   { orderId: "ORD-005", bond: BONDS_CATALOG[3], units: 75, purchaseDate: "2024-11-18", purchasePrice: 1005, availableUnits: 75 },
 ];
 
