@@ -30,6 +30,7 @@ export const MOCK_SELL_REQUESTS: SellRequest[] = [
     source: "liquibonds", units: 20, desiredYield: 9.25, buyYield: 8.75, transactionDate: "2026-03-23",
     status: "negotiation", createdAt: "2026-03-10T10:30:00", updatedAt: "2026-03-12T14:00:00",
     orderId: "ORD-001", bankAccount: DEFAULT_BANK,
+    internalRemark: "Investor is a high-value client. Prefer to close this deal — yield gap is small.",
     negotiationRounds: [
       { round: 1, proposedBy: "investor", yield: 9.25, price: 1015, timestamp: "2026-03-10T10:30:00", deadline: "2026-03-12T10:30:00", note: "Initiating sell at desired yield." },
       { round: 2, proposedBy: "ops", yield: 9.50, price: 1008, timestamp: "2026-03-11T09:00:00", deadline: "2026-03-13T09:00:00", note: "Counter with higher yield based on current market rates." },
@@ -47,6 +48,7 @@ export const MOCK_SELL_REQUESTS: SellRequest[] = [
     source: "external", units: 15, desiredYield: 8.60, buyYield: 8.25, transactionDate: "2026-03-25",
     status: "buyer_approved", createdAt: "2026-03-08T14:00:00", updatedAt: "2026-03-11T16:00:00",
     orderId: "ORD-003",
+    internalRemark: "External bond — verify DP account before settlement. KYC documents on file.",
     dpAccountId: "1234567890123456", settlementDate: "2026-03-25", bankAccount: DEFAULT_BANK,
     negotiationRounds: [
       { round: 1, proposedBy: "investor", yield: 8.60, price: 1005, timestamp: "2026-03-08T14:00:00", deadline: "2026-03-10T14:00:00" },

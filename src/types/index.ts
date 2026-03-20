@@ -61,6 +61,7 @@ export interface SellRequest {
   utrNumber?: string;
   rfqNumber?: string;
   bankAccount?: BankAccount;
+  internalRemark?: string;
 }
 
 export interface NegotiationRound {

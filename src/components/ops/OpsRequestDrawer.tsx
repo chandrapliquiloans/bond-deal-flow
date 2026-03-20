@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { X, Check, XCircle, ArrowLeftRight } from "lucide-react";
+import { X, Check, XCircle, ArrowLeftRight, Lock } from "lucide-react";
 
 interface OpsRequestDrawerProps {
   request: SellRequest;
@@ -15,11 +15,41 @@ interface OpsRequestDrawerProps {
 
 type ActionType = "cancel" | "reject" | "counter" | null;
 
+/** Reusable internal remark field — OPS eyes only */
+function InternalRemarkField({
+  value,
+  onChange,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+}) {
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center gap-1.5">
+        <Lock className="h-3 w-3 text-muted-foreground" />
+        <Label className="text-sm text-muted-foreground">Internal Note (OPS only)</Label>
+      </div>
+      <Textarea
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="rounded-sm text-sm min-h-[70px] bg-muted/30 border-dashed"
+        placeholder="Add a private note visible only to OPS team..."
+        rows={2}
+      />
+    </div>
+  );
+}
+
 export function OpsRequestDrawer({ request, onClose, onConfirm }: OpsRequestDrawerProps) {
   const [action, setAction] = useState<ActionType>(null);
   const [counterYield, setCounterYield] = useState("");
   const [remark, setRemark] = useState("");
+  const [publicRemark, setPublicRemark] = useState("");
+  const [internalRemark, setInternalRemark] = useState(request.internalRemark ?? "");
+  const [remarksSaved, setRemarksSaved] = useState(false);
   const [confirmed, setConfirmed] = useState(false);
+  // Per-action internal notes
+  const [actionInternalNote, setActionInternalNote] = useState("");
 
   const lastRound = request.negotiationRounds[request.negotiationRounds.length - 1];
   const sellerYield = lastRound?.proposedBy === "investor" ? lastRound.yield : request.desiredYield;
@@ -42,6 +72,7 @@ export function OpsRequestDrawer({ request, onClose, onConfirm }: OpsRequestDraw
     setAction(null);
     setCounterYield("");
     setRemark("");
+    setActionInternalNote("");
   };
 
   return (
@@ -137,35 +168,89 @@ export function OpsRequestDrawer({ request, onClose, onConfirm }: OpsRequestDraw
                 )}
               </div>
 
-              {/* Negotiation history */}
-              {request.negotiationRounds.length > 0 && (
-                <div className="space-y-2">
-                  <h3 className="text-sm font-semibold">Negotiation History</h3>
-                  {request.negotiationRounds.map((round) => (
-                    <div
-                      key={round.round}
-                      className={`rounded p-3 text-xs border ${
-                        round.proposedBy === "ops"
-                          ? "bg-accent/5 border-accent/20"
-                          : "bg-muted/50 border-border"
-                      }`}
-                    >
-                      <div className="flex justify-between mb-1">
-                        <span className="font-medium">
-                          Round {round.round} — {round.proposedBy === "ops" ? "Your Counter (Buyer)" : "Seller"}
-                        </span>
-                        <span className="text-muted-foreground">
-                          {new Date(round.timestamp).toLocaleString()}
+              {/* Negotiation history + internal remark */}
+              <div className="space-y-2">
+                <h3 className="text-sm font-semibold">Negotiation History</h3>
+                {request.negotiationRounds.map((round) => (
+                  <div
+                    key={round.round}
+                    className={`rounded p-3 text-xs border ${
+                      round.proposedBy === "ops"
+                        ? "bg-accent/5 border-accent/20"
+                        : "bg-muted/50 border-border"
+                    }`}
+                  >
+                    <div className="flex justify-between mb-1">
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium">Round {round.round}</span>
+                        <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-semibold ${
+                          round.proposedBy === "ops"
+                            ? "bg-accent/20 text-accent"
+                            : "bg-warning/20 text-warning"
+                        }`}>
+                          {round.proposedBy === "ops" ? "You (Buyer)" : "Seller"}
                         </span>
                       </div>
-                      <div className="flex gap-4">
-                        <span>Yield: <strong>{round.yield}%</strong></span>
-                        <span>Price: <strong>₹{round.price}</strong></span>
-                      </div>
+                      <span className="text-muted-foreground">
+                        {new Date(round.timestamp).toLocaleString()}
+                      </span>
                     </div>
-                  ))}
+                    <div className="flex gap-4 mb-1">
+                      <span>Yield: <strong>{round.yield}%</strong></span>
+                      <span>Price: <strong>₹{round.price}</strong></span>
+                    </div>
+                    {round.note && (
+                      <p className="text-muted-foreground italic mt-1.5 border-t border-border/40 pt-1.5">
+                        "{round.note}"
+                      </p>
+                    )}
+                  </div>
+                ))}
+
+                {/* Remarks block — public + internal side by side */}
+                <div className="rounded p-3 text-xs border border-dashed border-border bg-muted/20 space-y-3">
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1.5">
+                      <Label className="text-xs font-medium">Remark</Label>
+                      <Textarea
+                        value={publicRemark}
+                        onChange={(e) => { setPublicRemark(e.target.value); setRemarksSaved(false); }}
+                        className="rounded-sm text-xs min-h-[70px] bg-card"
+                        placeholder="Visible to investor..."
+                        rows={3}
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <div className="flex items-center gap-1">
+                        <Lock className="h-3 w-3 text-muted-foreground" />
+                        <Label className="text-xs font-medium text-muted-foreground">Internal Remark</Label>
+                      </div>
+                      <Textarea
+                        value={internalRemark}
+                        onChange={(e) => { setInternalRemark(e.target.value); setRemarksSaved(false); }}
+                        className="rounded-sm text-xs min-h-[70px] bg-card border-dashed"
+                        placeholder="OPS eyes only..."
+                        rows={3}
+                      />
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <p className="text-muted-foreground">Internal remark is not visible to investors or IFAs.</p>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="h-6 text-xs rounded-sm"
+                      disabled={
+                        (publicRemark.trim() === "" && internalRemark === (request.internalRemark ?? "")) ||
+                        remarksSaved
+                      }
+                      onClick={() => setRemarksSaved(true)}
+                    >
+                      {remarksSaved ? "Saved" : "Save"}
+                    </Button>
+                  </div>
                 </div>
-              )}
+              </div>
 
               {/* Buyer Approved — info only, no action buttons */}
               {request.status === "buyer_approved" && (
@@ -234,11 +319,12 @@ export function OpsRequestDrawer({ request, onClose, onConfirm }: OpsRequestDraw
                       value={remark}
                       onChange={(e) => setRemark(e.target.value)}
                       className="rounded-sm text-sm min-h-[80px]"
-                      placeholder="Add a note for internal tracking..."
+                      placeholder="Add a note for the investor..."
                       rows={3}
                     />
                     <p className="text-xs text-muted-foreground">This remark will be recorded for audit purposes.</p>
                   </div>
+                  <InternalRemarkField value={actionInternalNote} onChange={setActionInternalNote} />
                   <div className="flex gap-2">
                     <Button variant="outline" className="rounded-sm text-sm" onClick={resetAction}>
                       Back
@@ -277,6 +363,7 @@ export function OpsRequestDrawer({ request, onClose, onConfirm }: OpsRequestDraw
                     />
                     <p className="text-xs text-muted-foreground">This remark will be recorded for audit purposes.</p>
                   </div>
+                  <InternalRemarkField value={actionInternalNote} onChange={setActionInternalNote} />
                   <div className="flex gap-2">
                     <Button variant="outline" className="rounded-sm text-sm" onClick={resetAction}>
                       Back
@@ -341,11 +428,13 @@ export function OpsRequestDrawer({ request, onClose, onConfirm }: OpsRequestDraw
                       value={remark}
                       onChange={(e) => setRemark(e.target.value)}
                       className="rounded-sm text-sm min-h-[80px]"
-                      placeholder="Add a note for internal tracking..."
+                      placeholder="Add a note for the investor..."
                       rows={3}
                     />
                     <p className="text-xs text-muted-foreground">This remark will be recorded for audit purposes.</p>
                   </div>
+
+                  <InternalRemarkField value={actionInternalNote} onChange={setActionInternalNote} />
 
                   <div className="flex gap-2">
                     <Button variant="outline" className="rounded-sm text-sm" onClick={resetAction}>
