@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Check, X, CreditCard, Clock, RotateCcw, ArrowLeftRight } from "lucide-react";
+import { Check, X, Clock, ArrowLeftRight } from "lucide-react";
 
 interface ActionModalProps {
   modalState: { isOpen: boolean; action: string; requestId: string; remark: string };
@@ -26,11 +26,10 @@ function ActionModal({ modalState, requests, onClose, onSubmit, onRemarkChange }
   const getModalTitle = () => {
     switch (modalState.action) {
       case "Cancel": return "Cancel Sell Request";
-      case "Reject": return "Reject Sell Request";
+      case "Reject": return "Reject Proposal";
       case "Approve": return "Approve Sell Request";
-      case "Make Payment": return "Make Payment";
+      case "Check Payment": return "Payment Status";
       case "View Details": return "Transaction Details";
-      case "Retry": return "Retry Sell Request";
       default: return "Action Required";
     }
   };
@@ -38,17 +37,16 @@ function ActionModal({ modalState, requests, onClose, onSubmit, onRemarkChange }
   const getModalDescription = () => {
     switch (modalState.action) {
       case "Cancel": return "Are you sure you want to cancel this sell request? This action cannot be undone.";
-      case "Reject": return "Please provide a reason for rejecting this sell request.";
+      case "Reject": return "Please provide a reason for rejecting this proposal.";
       case "Approve": return "Please confirm your approval for this sell request.";
-      case "Make Payment": return "Complete the payment for this approved sell request.";
+      case "Check Payment": return "Current payment status for this sell request.";
       case "View Details": return "View the complete transaction details.";
-      case "Retry": return "Retry this sell request with updated parameters.";
       default: return "";
     }
   };
 
-  const showRemarkField = ["Cancel", "Reject", "Approve", "Retry"].includes(modalState.action);
-  const showPaymentFields = modalState.action === "Make Payment";
+  const showRemarkField = ["Cancel", "Reject", "Approve"].includes(modalState.action);
+  const showPaymentStatus = modalState.action === "Check Payment";
 
   return (
     <>
@@ -101,23 +99,47 @@ function ActionModal({ modalState, requests, onClose, onSubmit, onRemarkChange }
             </div>
           )}
 
-          {/* Payment Fields */}
-          {showPaymentFields && (
+          {/* Check Payment Status */}
+          {showPaymentStatus && (
             <div className="space-y-3">
-              <div className="space-y-2">
-                <Label className="text-sm">Payment Amount</Label>
-                <div className="text-lg font-semibold">₹{(request.units * 1000 * (1 + request.desiredYield / 100)).toFixed(2)}</div>
-              </div>
-              <div className="space-y-2">
-                <Label className="text-sm">Payment Method</Label>
-                <select className="w-full rounded border border-input px-3 py-2 text-sm">
-                  <option>Bank Transfer</option>
-                  <option>UPI</option>
-                  <option>Net Banking</option>
-                </select>
-              </div>
-              <div className="bg-muted/50 rounded p-3 text-xs text-muted-foreground">
-                UTR will be assigned by the buyer (LiquiBonds Ops) after payment confirmation.
+              {request.status === "seller_approved" ? (
+                <div className="bg-warning/10 border border-warning/30 rounded p-4 space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Clock className="h-4 w-4 text-warning shrink-0" />
+                    <p className="text-sm font-semibold text-warning">Awaiting Payment from Buyer</p>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Your sell request has been approved. LiquiBonds Ops will transfer the funds to your registered bank account. You will be notified once payment is processed.
+                  </p>
+                </div>
+              ) : (
+                <div className="bg-success/10 border border-success/30 rounded p-4 space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Check className="h-4 w-4 text-success shrink-0" />
+                    <p className="text-sm font-semibold text-success">Payment Received</p>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Payment has been confirmed and is being processed.
+                  </p>
+                </div>
+              )}
+              {request.bankAccount && (
+                <div className="bg-muted/50 rounded p-3 text-xs space-y-1.5">
+                  <p className="font-medium text-muted-foreground">Payment will be credited to</p>
+                  <p className="font-semibold">{request.bankAccount.bankName}</p>
+                  <p className="font-mono text-muted-foreground">{request.bankAccount.accountNumber}</p>
+                  <p className="text-muted-foreground">IFSC: {request.bankAccount.ifscCode}</p>
+                </div>
+              )}
+              <div className="bg-muted/50 rounded p-3 text-xs space-y-1.5">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Expected Amount</span>
+                  <span className="font-semibold">₹{(request.units * 1000 * (1 + request.desiredYield / 100)).toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Settlement Date</span>
+                  <span>{request.transactionDate}</span>
+                </div>
               </div>
             </div>
           )}
@@ -168,12 +190,12 @@ function ActionModal({ modalState, requests, onClose, onSubmit, onRemarkChange }
             >
               Cancel
             </Button>
-            {modalState.action !== "View Details" && (
+            {!["View Details", "Check Payment"].includes(modalState.action) && (
               <Button
                 onClick={onSubmit}
                 className="flex-1 text-sm rounded-sm bg-accent text-accent-foreground hover:bg-accent/90"
               >
-                {modalState.action === "Make Payment" ? "Complete Payment" : `Confirm ${modalState.action}`}
+                {`Confirm ${modalState.action}`}
               </Button>
             )}
           </div>
@@ -485,10 +507,8 @@ const filterOptions: { label: string; value: SellRequestStatus | "all" }[] = [
 
 const ACTION_STATUS_MAP: Record<string, SellRequestStatus> = {
   Cancel: "terminated",
-  Reject: "rejected",
+  Reject: "terminated",
   Approve: "seller_approved",
-  "Make Payment": "payment_done",
-  Retry: "sell_initiated",
 };
 
 export default function InvestorSellRequests() {
@@ -623,10 +643,10 @@ export default function InvestorSellRequests() {
               size="sm"
               variant="outline"
               className="text-xs h-7 px-2"
-              onClick={() => handleAction("Make Payment", request.id)}
+              onClick={() => handleAction("Check Payment", request.id)}
             >
-              <CreditCard className="h-3 w-3 mr-1" />
-              Pay
+              <Clock className="h-3 w-3 mr-1" />
+              Check Payment
             </Button>
           </div>
         );
@@ -674,19 +694,7 @@ export default function InvestorSellRequests() {
       case "rejected":
         return null;
       case "terminated":
-        return (
-          <div className="flex gap-1">
-            <Button
-              size="sm"
-              variant="outline"
-              className="text-xs h-7 px-2"
-              onClick={() => handleAction("Retry", request.id)}
-            >
-              <RotateCcw className="h-3 w-3 mr-1" />
-              Retry
-            </Button>
-          </div>
-        );
+        return null;
       default:
         return null;
     }
