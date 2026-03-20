@@ -2,6 +2,7 @@ import { useState } from "react";
 import { PortalLayout } from "@/components/PortalLayout";
 import { MOCK_PORTFOLIO, MOCK_SELL_REQUESTS } from "@/data/mockData";
 import { StatusBadge } from "@/components/StatusBadge";
+import { BankAccount } from "@/types";
 
 type TxType = "all" | "buy" | "sell";
 
@@ -15,6 +16,8 @@ interface UnifiedTransaction {
   yield?: number;
   date: string;
   status: string;
+  utrNumber?: string;
+  bankAccount?: BankAccount;
 }
 
 const buyTransactions: UnifiedTransaction[] = MOCK_PORTFOLIO.map((o) => ({
@@ -37,7 +40,9 @@ const sellTransactions: UnifiedTransaction[] = MOCK_SELL_REQUESTS.map((r) => ({
   price: r.bond.faceValue,
   yield: r.desiredYield,
   date: r.transactionDate,
-  status: "settled",
+  status: r.status,
+  utrNumber: r.utrNumber,
+  bankAccount: r.bankAccount,
 }));
 
 const allTransactions: UnifiedTransaction[] = [
@@ -113,6 +118,8 @@ export default function InvestorTransactions() {
                 <th className="text-right p-3 font-medium">Price</th>
                 <th className="text-right p-3 font-medium">Yield</th>
                 <th className="text-left p-3 font-medium">Date</th>
+                <th className="text-left p-3 font-medium">UTR</th>
+                <th className="text-left p-3 font-medium">Bank</th>
                 <th className="text-left p-3 font-medium">Status</th>
               </tr>
             </thead>
@@ -137,8 +144,19 @@ export default function InvestorTransactions() {
                   <td className="p-3 text-right text-xs">₹{tx.price.toLocaleString()}</td>
                   <td className="p-3 text-right text-xs">{tx.yield != null ? `${tx.yield}%` : "—"}</td>
                   <td className="p-3 text-xs">{tx.date}</td>
+                  <td className="p-3 text-xs font-mono">
+                    {tx.type === "sell" ? (tx.utrNumber ?? <span className="text-muted-foreground">—</span>) : <span className="text-muted-foreground">—</span>}
+                  </td>
+                  <td className="p-3 text-xs">
+                    {tx.bankAccount ? (
+                      <div>
+                        <p className="font-medium">{tx.bankAccount.bankName}</p>
+                        <p className="font-mono text-muted-foreground">{tx.bankAccount.accountNumber}</p>
+                      </div>
+                    ) : <span className="text-muted-foreground">—</span>}
+                  </td>
                   <td className="p-3">
-                    <StatusBadge status="settled" />
+                    <StatusBadge status={tx.status as any} />
                   </td>
                 </tr>
               ))}
@@ -191,6 +209,25 @@ export default function InvestorTransactions() {
               </div>
               {tx.type === "buy" && (
                 <p className="text-xs text-muted-foreground">Date: {tx.date}</p>
+              )}
+              {(tx.utrNumber || tx.bankAccount) && (
+                <div className="pt-2 border-t border-border space-y-1.5 text-xs">
+                  {tx.type === "sell" && tx.utrNumber && (
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">UTR</span>
+                      <span className="font-mono font-medium">{tx.utrNumber}</span>
+                    </div>
+                  )}
+                  {tx.bankAccount && (
+                    <div className="flex justify-between items-start">
+                      <span className="text-muted-foreground">Bank</span>
+                      <div className="text-right">
+                        <p className="font-medium">{tx.bankAccount.bankName}</p>
+                        <p className="font-mono text-muted-foreground">{tx.bankAccount.accountNumber}</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
               )}
             </div>
           ))}

@@ -1,4 +1,12 @@
-import { Bond, PurchaseOrder, SellRequest, IFAClient, TradeRecord } from "@/types";
+import { Bond, PurchaseOrder, SellRequest, IFAClient, TradeRecord, BankAccount } from "@/types";
+
+export const MOCK_BANK_ACCOUNTS: BankAccount[] = [
+  { id: "BANK-001", bankName: "HDFC Bank", accountNumber: "XXXX XXXX 4521", ifscCode: "HDFC0001234", accountHolderName: "Nisha Sharma", isDefault: true },
+  { id: "BANK-002", bankName: "ICICI Bank", accountNumber: "XXXX XXXX 8832", ifscCode: "ICIC0005678", accountHolderName: "Nisha Sharma", isDefault: false },
+  { id: "BANK-003", bankName: "Axis Bank", accountNumber: "XXXX XXXX 2201", ifscCode: "UTIB0003456", accountHolderName: "Nisha Sharma", isDefault: false },
+];
+
+const DEFAULT_BANK = MOCK_BANK_ACCOUNTS.find((b) => b.isDefault)!;
 
 export const BONDS_CATALOG: Bond[] = [
   { isin: "INE002A07RY8", name: "Reliance Industries Ltd 8.95% 2027", couponRate: 8.95, maturityDate: "2027-06-15", faceValue: 1000, creditRating: "AAA", issuer: "Reliance Industries" },
@@ -21,7 +29,7 @@ export const MOCK_SELL_REQUESTS: SellRequest[] = [
     id: "SR-001", investorName: "Nisha Sharma", investorId: "INV-001", bond: BONDS_CATALOG[0],
     source: "liquibonds", units: 20, desiredYield: 9.25, buyYield: 8.75, transactionDate: "2026-03-23",
     status: "negotiation", createdAt: "2026-03-10T10:30:00", updatedAt: "2026-03-12T14:00:00",
-    orderId: "ORD-001",
+    orderId: "ORD-001", bankAccount: DEFAULT_BANK,
     negotiationRounds: [
       { round: 1, proposedBy: "investor", yield: 9.25, price: 1015, timestamp: "2026-03-10T10:30:00", deadline: "2026-03-12T10:30:00", note: "Initiating sell at desired yield." },
       { round: 2, proposedBy: "ops", yield: 9.50, price: 1008, timestamp: "2026-03-11T09:00:00", deadline: "2026-03-13T09:00:00", note: "Counter with higher yield based on current market rates." },
@@ -31,7 +39,7 @@ export const MOCK_SELL_REQUESTS: SellRequest[] = [
     id: "SR-002", investorName: "Rajesh Kumar", investorId: "INV-002", bond: BONDS_CATALOG[1],
     source: "liquibonds", units: 50, desiredYield: 8.10, buyYield: 7.85, transactionDate: "2026-03-24",
     status: "sell_initiated", createdAt: "2026-03-12T08:00:00", updatedAt: "2026-03-12T08:00:00",
-    orderId: "ORD-002",
+    orderId: "ORD-002", bankAccount: DEFAULT_BANK,
     negotiationRounds: [],
   },
   {
@@ -39,7 +47,7 @@ export const MOCK_SELL_REQUESTS: SellRequest[] = [
     source: "external", units: 15, desiredYield: 8.60, buyYield: 8.25, transactionDate: "2026-03-25",
     status: "buyer_approved", createdAt: "2026-03-08T14:00:00", updatedAt: "2026-03-11T16:00:00",
     orderId: "ORD-003",
-    dpAccountId: "1234567890123456", settlementDate: "2026-03-25",
+    dpAccountId: "1234567890123456", settlementDate: "2026-03-25", bankAccount: DEFAULT_BANK,
     negotiationRounds: [
       { round: 1, proposedBy: "investor", yield: 8.60, price: 1005, timestamp: "2026-03-08T14:00:00", deadline: "2026-03-10T14:00:00" },
     ],
@@ -49,7 +57,7 @@ export const MOCK_SELL_REQUESTS: SellRequest[] = [
     source: "liquibonds", units: 30, desiredYield: 9.30, buyYield: 8.95, transactionDate: "2026-03-15",
     status: "settled", createdAt: "2026-03-05T11:00:00", updatedAt: "2026-03-13T09:00:00",
     orderId: "ORD-004",
-    settlementDate: "2026-03-15", utrNumber: "UTR202603150001", rfqNumber: "RFQ-2026-0412",
+    settlementDate: "2026-03-15", utrNumber: "UTR202603150001", rfqNumber: "RFQ-2026-0412", bankAccount: DEFAULT_BANK,
     negotiationRounds: [
       { round: 1, proposedBy: "investor", yield: 9.30, price: 1002, timestamp: "2026-03-05T11:00:00", deadline: "2026-03-07T11:00:00" },
     ],
@@ -58,7 +66,7 @@ export const MOCK_SELL_REQUESTS: SellRequest[] = [
     id: "SR-005", investorName: "Sunita Reddy", investorId: "INV-005", bond: BONDS_CATALOG[4],
     source: "liquibonds", units: 40, desiredYield: 8.90, buyYield: 8.65, transactionDate: "2026-03-16",
     status: "rejected", createdAt: "2026-03-03T09:00:00", updatedAt: "2026-03-13T00:00:00",
-    orderId: "ORD-005",
+    orderId: "ORD-005", bankAccount: DEFAULT_BANK,
     negotiationRounds: [
       { round: 1, proposedBy: "investor", yield: 8.90, price: 1010, timestamp: "2026-03-03T09:00:00", deadline: "2026-03-05T09:00:00", note: "Initial sell request at market rate." },
       { round: 2, proposedBy: "ops", yield: 9.20, price: 998, timestamp: "2026-03-04T15:00:00", deadline: "2026-03-06T15:00:00", note: "Adjusted yield to reflect liquidity constraints." },

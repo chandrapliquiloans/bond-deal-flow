@@ -146,6 +146,14 @@ function ActionModal({ modalState, requests, onClose, onSubmit, onRemarkChange }
                   <span className="font-mono">{request.rfqNumber || "Pending"}</span>
                 </div>
               </div>
+              {request.bankAccount && (
+                <div className="bg-muted/50 rounded p-3 text-xs space-y-1">
+                  <p className="font-medium text-muted-foreground">Settlement Bank</p>
+                  <p className="font-semibold">{request.bankAccount.bankName}</p>
+                  <p className="font-mono text-muted-foreground">{request.bankAccount.accountNumber}</p>
+                  <p className="text-muted-foreground">IFSC: {request.bankAccount.ifscCode}</p>
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -261,6 +269,12 @@ function NegotiationModal({ request, onClose, onConfirm }: NegotiationModalProps
                   <span>{request.desiredYield}%</span>
                   <span className="text-muted-foreground">Settlement Date</span>
                   <span>{request.transactionDate}</span>
+                  {request.bankAccount && (
+                    <>
+                      <span className="text-muted-foreground">Settlement Bank</span>
+                      <span className="font-semibold">{request.bankAccount.bankName} · <span className="font-mono font-normal">{request.bankAccount.accountNumber}</span></span>
+                    </>
+                  )}
                 </div>
               </div>
 

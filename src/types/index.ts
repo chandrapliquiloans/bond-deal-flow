@@ -13,6 +13,15 @@ export type SellRequestStatus =
 
 export type BondSource = "liquibonds" | "external";
 
+export interface BankAccount {
+  id: string;
+  bankName: string;
+  accountNumber: string;
+  ifscCode: string;
+  accountHolderName: string;
+  isDefault: boolean;
+}
+
 export interface Bond {
   isin: string;
   name: string;
@@ -51,6 +60,7 @@ export interface SellRequest {
   settlementDate?: string;
   utrNumber?: string;
   rfqNumber?: string;
+  bankAccount?: BankAccount;
 }
 
 export interface NegotiationRound {

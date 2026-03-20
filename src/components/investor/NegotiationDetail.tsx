@@ -125,6 +125,16 @@ export function NegotiationDetail({ request: initialRequest, onBack }: Negotiati
             </div>
           )}
         </div>
+        {request.bankAccount && (
+          <div className="mt-3 pt-3 border-t border-border">
+            <p className="text-xs text-muted-foreground mb-1.5">Settlement Bank</p>
+            <div className="bg-muted/50 rounded p-2.5 text-xs space-y-0.5">
+              <p className="font-semibold">{request.bankAccount.bankName}</p>
+              <p className="font-mono text-muted-foreground">{request.bankAccount.accountNumber} · IFSC: {request.bankAccount.ifscCode}</p>
+              <p className="text-muted-foreground">{request.bankAccount.accountHolderName}</p>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Negotiation History - Sheet Trigger */}

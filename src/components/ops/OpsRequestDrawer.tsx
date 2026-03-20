@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { SellRequest, SellRequestStatus } from "@/types";
+import { SellRequest } from "@/types";
 import { StatusBadge } from "@/components/StatusBadge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -123,6 +123,16 @@ export function OpsRequestDrawer({ request, onClose, onConfirm }: OpsRequestDraw
                     </>
                   )}
                 </div>
+                {request.bankAccount && (
+                  <div className="mt-2 pt-2 border-t border-border/50 space-y-1">
+                    <p className="text-muted-foreground">Settlement Bank</p>
+                    <div className="bg-muted/50 rounded p-2 space-y-0.5">
+                      <p className="font-semibold">{request.bankAccount.bankName}</p>
+                      <p className="font-mono text-muted-foreground">{request.bankAccount.accountNumber} · IFSC: {request.bankAccount.ifscCode}</p>
+                      <p className="text-muted-foreground">{request.bankAccount.accountHolderName}</p>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Negotiation history */}

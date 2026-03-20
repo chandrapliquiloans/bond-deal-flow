@@ -3,7 +3,7 @@ import { X, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { MOCK_PORTFOLIO, BONDS_CATALOG, MOCK_SELL_REQUESTS } from "@/data/mockData";
+import { MOCK_PORTFOLIO, BONDS_CATALOG, MOCK_SELL_REQUESTS, MOCK_BANK_ACCOUNTS } from "@/data/mockData";
 
 const ACTIVE_STATUSES = ["sell_initiated", "negotiation", "buyer_approved", "seller_approved", "payment_done", "processing"];
 
@@ -35,6 +35,11 @@ export function SellStepper({ type, orderId, onClose }: SellStepperProps) {
   // External sell state (single modal, no steps)
   const [selectedIsin, setSelectedIsin] = useState("");
   const [externalUnits, setExternalUnits] = useState(0);
+
+  // Bank selection — default to marked-default bank
+  const defaultBank = MOCK_BANK_ACCOUNTS.find((b) => b.isDefault) ?? MOCK_BANK_ACCOUNTS[0];
+  const [selectedBankId, setSelectedBankId] = useState(defaultBank.id);
+  const selectedBank = MOCK_BANK_ACCOUNTS.find((b) => b.id === selectedBankId)!;
 
   // Shared state
   const [desiredYield, setDesiredYield] = useState("");
@@ -210,6 +215,42 @@ export function SellStepper({ type, orderId, onClose }: SellStepperProps) {
                   </div>
                 </div>
 
+                {/* Bank Selection */}
+                <div className="space-y-2">
+                  <Label className="text-sm">Settlement Bank Account</Label>
+                  <div className="space-y-2">
+                    {MOCK_BANK_ACCOUNTS.map((bank) => (
+                      <label
+                        key={bank.id}
+                        className={`flex items-start gap-3 p-3 rounded border cursor-pointer transition-colors ${
+                          selectedBankId === bank.id
+                            ? "border-accent bg-accent/5"
+                            : "border-border bg-muted/30 hover:bg-muted/50"
+                        }`}
+                      >
+                        <input
+                          type="radio"
+                          name="bank-external"
+                          value={bank.id}
+                          checked={selectedBankId === bank.id}
+                          onChange={() => setSelectedBankId(bank.id)}
+                          className="mt-0.5 shrink-0"
+                        />
+                        <div className="text-xs space-y-0.5 flex-1">
+                          <div className="flex items-center gap-2">
+                            <span className="font-semibold">{bank.bankName}</span>
+                            {bank.isDefault && (
+                              <span className="text-[10px] px-1.5 py-0.5 bg-accent/20 text-accent rounded-full font-medium">Default</span>
+                            )}
+                          </div>
+                          <p className="text-muted-foreground font-mono">{bank.accountNumber}</p>
+                          <p className="text-muted-foreground">IFSC: {bank.ifscCode}</p>
+                        </div>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
                 {/* Disclaimer */}
                 <label className="flex items-start gap-2 cursor-pointer">
                   <input
@@ -254,6 +295,11 @@ export function SellStepper({ type, orderId, onClose }: SellStepperProps) {
                 </div>
                 <div className="bg-accent/5 rounded p-3 text-xs text-muted-foreground">
                   Our team will review and match your quote with buyers shortly.
+                </div>
+                <div className="bg-muted/50 rounded p-3 text-xs space-y-0.5 text-left">
+                  <p className="text-muted-foreground">Settlement to:</p>
+                  <p className="font-semibold">{selectedBank.bankName}</p>
+                  <p className="font-mono text-muted-foreground">{selectedBank.accountNumber} · {selectedBank.ifscCode}</p>
                 </div>
                 <Button
                   className="bg-accent text-accent-foreground hover:bg-accent/90 rounded-sm text-sm"
@@ -386,6 +432,42 @@ export function SellStepper({ type, orderId, onClose }: SellStepperProps) {
                 </div>
               </div>
 
+              {/* Bank Selection */}
+              <div className="space-y-2">
+                <Label className="text-sm">Settlement Bank Account</Label>
+                <div className="space-y-2">
+                  {MOCK_BANK_ACCOUNTS.map((bank) => (
+                    <label
+                      key={bank.id}
+                      className={`flex items-start gap-3 p-3 rounded border cursor-pointer transition-colors ${
+                        selectedBankId === bank.id
+                          ? "border-accent bg-accent/5"
+                          : "border-border bg-muted/30 hover:bg-muted/50"
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name="bank-internal"
+                        value={bank.id}
+                        checked={selectedBankId === bank.id}
+                        onChange={() => setSelectedBankId(bank.id)}
+                        className="mt-0.5 shrink-0"
+                      />
+                      <div className="text-xs space-y-0.5 flex-1">
+                        <div className="flex items-center gap-2">
+                          <span className="font-semibold">{bank.bankName}</span>
+                          {bank.isDefault && (
+                            <span className="text-[10px] px-1.5 py-0.5 bg-accent/20 text-accent rounded-full font-medium">Default</span>
+                          )}
+                        </div>
+                        <p className="text-muted-foreground font-mono">{bank.accountNumber}</p>
+                        <p className="text-muted-foreground">IFSC: {bank.ifscCode}</p>
+                      </div>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
               <label className="flex items-start gap-2 cursor-pointer">
                 <input
                   type="checkbox"
@@ -414,6 +496,11 @@ export function SellStepper({ type, orderId, onClose }: SellStepperProps) {
               <div className="bg-accent/5 rounded p-3 text-xs text-muted-foreground">
                 Our Team will review your request shortly. You'll receive updates via
                 email and in-app notifications.
+              </div>
+              <div className="bg-muted/50 rounded p-3 text-xs space-y-0.5 text-left">
+                <p className="text-muted-foreground">Settlement to:</p>
+                <p className="font-semibold">{selectedBank.bankName}</p>
+                <p className="font-mono text-muted-foreground">{selectedBank.accountNumber} · {selectedBank.ifscCode}</p>
               </div>
             </div>
           )}
