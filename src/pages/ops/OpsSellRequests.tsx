@@ -10,6 +10,30 @@ import { Label } from "@/components/ui/label";
 import { AlertTriangle, Search, X as XIcon } from "lucide-react";
 import { addWorkingDays, formatDate } from "@/lib/utils";
 
+/** Which party needs to act next on this request */
+function getBucket(req: SellRequest): "buyer" | "seller" {
+  if (req.status === "sell_initiated") return "buyer";
+  if (req.status === "negotiation") {
+    const last = req.negotiationRounds[req.negotiationRounds.length - 1];
+    return last?.proposedBy === "ops" ? "seller" : "buyer";
+  }
+  if (req.status === "buyer_approved") return "seller";
+  if (req.status === "seller_approved") return "seller";
+  return "buyer";
+}
+
+function BucketBadge({ bucket }: { bucket: "buyer" | "seller" }) {
+  return bucket === "buyer" ? (
+    <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-blue-100 text-blue-700 border border-blue-200">
+      Awaiting Buyer
+    </span>
+  ) : (
+    <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-warning/15 text-warning border border-warning/30">
+      Awaiting Seller
+    </span>
+  );
+}
+
 // Statuses that are still pending / actionable
 const PENDING_STATUSES: SellRequestStatus[] = [
   "sell_initiated",
@@ -229,12 +253,14 @@ export default function OpsSellRequests() {
                 <th className="text-right p-3 font-medium">Seller Yield</th>
                 <th className="text-left p-3 font-medium">Settlement Date</th>
                 <th className="text-left p-3 font-medium">Status</th>
+                <th className="text-left p-3 font-medium">Bucket</th>
                 <th className="text-right p-3 font-medium">Actions</th>
               </tr>
             </thead>
             <tbody>
               {filtered.map((req) => {
                 const settlementValid = isSettlementValid(req.transactionDate);
+                const bucket = getBucket(req);
                 return (
                   <tr key={req.id} className="border-t border-border hover:bg-muted/30 transition-colors">
                     <td className="p-3 font-mono text-xs">{req.id}</td>
@@ -250,11 +276,12 @@ export default function OpsSellRequests() {
                           {req.transactionDate}
                         </span>
                         {!settlementValid && (
-                          <AlertTriangle className="h-3.5 w-3.5 text-destructive" title="Settlement date must be at least T+2 working days" />
+                          <AlertTriangle className="h-3.5 w-3.5 text-destructive" />
                         )}
                       </div>
                     </td>
                     <td className="p-3"><StatusBadge status={req.status} /></td>
+                    <td className="p-3"><BucketBadge bucket={bucket} /></td>
                     <td className="p-3 text-right">
                       <Button
                         size="sm"
@@ -282,6 +309,7 @@ export default function OpsSellRequests() {
         <div className="md:hidden space-y-3">
           {filtered.map((req) => {
             const settlementValid = isSettlementValid(req.transactionDate);
+            const bucket = getBucket(req);
             return (
               <div key={req.id} className="card-elevated p-4 space-y-3">
                 <div className="flex justify-between items-start">
@@ -292,7 +320,10 @@ export default function OpsSellRequests() {
                     </p>
                     <p className="text-xs font-mono text-muted-foreground">{req.id}</p>
                   </div>
-                  <StatusBadge status={req.status} />
+                  <div className="flex flex-col items-end gap-1">
+                    <StatusBadge status={req.status} />
+                    <BucketBadge bucket={bucket} />
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-3 gap-2 text-xs">

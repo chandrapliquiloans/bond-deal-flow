@@ -23,6 +23,8 @@ export function OpsRequestDrawer({ request, onClose, onConfirm }: OpsRequestDraw
 
   const lastRound = request.negotiationRounds[request.negotiationRounds.length - 1];
   const sellerYield = lastRound?.proposedBy === "investor" ? lastRound.yield : request.desiredYield;
+  // OPS countered last — must wait for seller to respond before accepting or countering again
+  const awaitingSellerResponse = request.status === "negotiation" && lastRound?.proposedBy === "ops";
 
   const counterYieldValid =
     counterYield !== "" && parseFloat(counterYield) >= 4 && parseFloat(counterYield) <= 25;
@@ -179,13 +181,20 @@ export function OpsRequestDrawer({ request, onClose, onConfirm }: OpsRequestDraw
               {request.status !== "buyer_approved" && !action && (
                 <div className="space-y-3">
                   <h3 className="text-sm font-semibold">Take Action</h3>
+                  {awaitingSellerResponse && (
+                    <div className="bg-warning/10 border border-warning/30 rounded p-3 text-xs text-warning font-medium">
+                      You have sent a counter. Waiting for the seller to respond — only Reject is available until they act.
+                    </div>
+                  )}
                   <div className="flex gap-2">
-                    <Button
-                      className="flex-1 bg-success text-success-foreground hover:bg-success/90 rounded-sm text-sm gap-1"
-                      onClick={() => setAction("cancel")}
-                    >
-                      <Check className="h-4 w-4" /> Accept
-                    </Button>
+                    {!awaitingSellerResponse && (
+                      <Button
+                        className="flex-1 bg-success text-success-foreground hover:bg-success/90 rounded-sm text-sm gap-1"
+                        onClick={() => setAction("cancel")}
+                      >
+                        <Check className="h-4 w-4" /> Accept
+                      </Button>
+                    )}
                     <Button
                       variant="outline"
                       className="flex-1 border-destructive text-destructive hover:bg-destructive/10 rounded-sm text-sm gap-1"
@@ -193,12 +202,14 @@ export function OpsRequestDrawer({ request, onClose, onConfirm }: OpsRequestDraw
                     >
                       <XCircle className="h-4 w-4" /> Reject
                     </Button>
-                    <Button
-                      className="flex-1 bg-blue-600 text-white hover:bg-blue-700 rounded-sm text-sm gap-1"
-                      onClick={() => setAction("counter")}
-                    >
-                      <ArrowLeftRight className="h-4 w-4" /> Counter
-                    </Button>
+                    {!awaitingSellerResponse && (
+                      <Button
+                        className="flex-1 bg-blue-600 text-white hover:bg-blue-700 rounded-sm text-sm gap-1"
+                        onClick={() => setAction("counter")}
+                      >
+                        <ArrowLeftRight className="h-4 w-4" /> Counter
+                      </Button>
+                    )}
                   </div>
                 </div>
               )}

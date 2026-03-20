@@ -73,6 +73,39 @@ export const MOCK_SELL_REQUESTS: SellRequest[] = [
       { round: 3, proposedBy: "investor", yield: 9.05, price: 1004, timestamp: "2026-03-06T10:00:00", deadline: "2026-03-08T10:00:00", note: "Compromise offer — final counter." },
     ],
   },
+  {
+    // Negotiation — investor's last counter (buyer bucket: OPS must respond)
+    id: "SR-006", investorName: "Deepak Mehta", investorId: "INV-006", bond: BONDS_CATALOG[1],
+    source: "liquibonds", units: 20, desiredYield: 8.20, buyYield: 7.95, transactionDate: "2026-03-28",
+    status: "negotiation", createdAt: "2026-03-15T09:00:00", updatedAt: "2026-03-18T11:00:00",
+    orderId: "ORD-003", bankAccount: DEFAULT_BANK,
+    negotiationRounds: [
+      { round: 1, proposedBy: "investor", yield: 8.20, price: 998, timestamp: "2026-03-15T09:00:00", deadline: "2026-03-17T09:00:00", note: "Opening ask at market rate." },
+      { round: 2, proposedBy: "ops", yield: 8.45, price: 992, timestamp: "2026-03-16T10:00:00", deadline: "2026-03-18T10:00:00", note: "Counter reflecting liquidity premium." },
+      { round: 3, proposedBy: "investor", yield: 8.30, price: 995, timestamp: "2026-03-18T11:00:00", deadline: "2026-03-20T11:00:00", note: "Mid-point compromise." },
+    ],
+  },
+  {
+    // Processing — OPS is processing the settlement
+    id: "SR-009", investorName: "Meera Iyer", investorId: "INV-009", bond: BONDS_CATALOG[0],
+    source: "liquibonds", units: 15, desiredYield: 9.00, buyYield: 8.70, transactionDate: "2026-03-24",
+    status: "processing", createdAt: "2026-03-12T11:00:00", updatedAt: "2026-03-19T09:00:00",
+    orderId: "ORD-001", settlementDate: "2026-03-24", rfqNumber: "RFQ-2026-0510", bankAccount: DEFAULT_BANK,
+    negotiationRounds: [
+      { round: 1, proposedBy: "investor", yield: 9.00, price: 1007, timestamp: "2026-03-12T11:00:00", deadline: "2026-03-14T11:00:00" },
+    ],
+  },
+  {
+    // Terminated — auto-terminated on T-day
+    id: "SR-010", investorName: "Rohit Das", investorId: "INV-010", bond: BONDS_CATALOG[4],
+    source: "liquibonds", units: 10, desiredYield: 8.80, buyYield: 8.55, transactionDate: "2026-03-10",
+    status: "terminated", createdAt: "2026-03-07T08:00:00", updatedAt: "2026-03-10T23:59:00",
+    orderId: "ORD-002", bankAccount: DEFAULT_BANK,
+    negotiationRounds: [
+      { round: 1, proposedBy: "investor", yield: 8.80, price: 1008, timestamp: "2026-03-07T08:00:00", deadline: "2026-03-09T08:00:00", note: "Sell at market rate." },
+      { round: 2, proposedBy: "ops", yield: 9.00, price: 1002, timestamp: "2026-03-08T12:00:00", deadline: "2026-03-10T12:00:00", note: "Counter to match current market." },
+    ],
+  },
 ];
 
 export const MOCK_IFA_CLIENTS: IFAClient[] = [
@@ -95,4 +128,12 @@ export const MOCK_TRADES: TradeRecord[] = [
   { id: "TR-011", sellRequestId: "SR-001", investorName: "Nisha Sharma", bond: BONDS_CATALOG[0], units: 20, settledYield: 9.25, settlementDate: "2026-03-18", rfqNumber: "RFQ-2026-0501", status: "rfq_placed" },
   { id: "TR-012", sellRequestId: "SR-002", investorName: "Rajesh Kumar", bond: BONDS_CATALOG[1], units: 50, settledYield: 8.10, settlementDate: "2026-03-18", status: "pending_payment" },
   { id: "TR-013", sellRequestId: "SR-003", investorName: "Priya Patel", bond: BONDS_CATALOG[2], units: 15, settledYield: 8.60, settlementDate: "2026-03-18", utrNumber: "UTR202603180001", rfqNumber: "RFQ-2026-0502", status: "settled" },
+
+  // Today's trades — 2026-03-20
+  { id: "TR-014", sellRequestId: "SR-001", investorName: "Nisha Sharma", bond: BONDS_CATALOG[0], units: 20, settledYield: 9.25, settlementDate: "2026-03-20", utrNumber: "UTR202603200001", rfqNumber: "RFQ-2026-0601", status: "in_progress" },
+  { id: "TR-015", sellRequestId: "SR-006", investorName: "Deepak Mehta", bond: BONDS_CATALOG[1], units: 20, settledYield: 8.30, settlementDate: "2026-03-20", utrNumber: "UTR202603200002", rfqNumber: "RFQ-2026-0602", status: "in_progress" },
+  { id: "TR-016", sellRequestId: "SR-007", investorName: "Kavita Singh", bond: BONDS_CATALOG[2], units: 25, settledYield: 8.55, settlementDate: "2026-03-20", status: "pending_payment" },
+  { id: "TR-017", sellRequestId: "SR-008", investorName: "Arjun Nair", bond: BONDS_CATALOG[3], units: 35, settledYield: 9.15, settlementDate: "2026-03-20", status: "pending_payment" },
+  { id: "TR-018", sellRequestId: "SR-009", investorName: "Meera Iyer", bond: BONDS_CATALOG[0], units: 15, settledYield: 9.00, settlementDate: "2026-03-20", utrNumber: "UTR202603200003", rfqNumber: "RFQ-2026-0603", status: "in_progress" },
+  { id: "TR-019", sellRequestId: "SR-002", investorName: "Rajesh Kumar", bond: BONDS_CATALOG[1], units: 50, settledYield: 8.10, settlementDate: "2026-03-20", status: "pending_payment" },
 ];

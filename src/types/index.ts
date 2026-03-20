@@ -92,5 +92,5 @@ export interface TradeRecord {
   settlementDate: string;
   utrNumber?: string;
   rfqNumber?: string;
-  status: "pending_payment" | "payment_uploaded" | "rfq_placed" | "settled";
+  status: "pending_payment" | "payment_uploaded" | "rfq_placed" | "in_progress" | "settled";
 }

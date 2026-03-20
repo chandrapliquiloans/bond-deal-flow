@@ -9,9 +9,10 @@ import { formatDate } from "@/lib/utils";
 import { X, Check, Search } from "lucide-react";
 
 const STATUS_LABELS: Record<string, string> = {
-  pending_payment: "Pending Payment",
+  pending_payment: "Payment Pending",
   payment_uploaded: "Payment Uploaded",
   rfq_placed: "RFQ Placed",
+  in_progress: "In Progress",
   settled: "Settled",
 };
 
@@ -171,36 +172,49 @@ function TradeViewDrawer({ trade, onClose, onUtrSubmit }: TradeViewDrawerProps) 
                 </div>
               </div>
 
-              {/* UTR form */}
-              <div className="space-y-4 border-t border-border pt-4">
-                <h3 className="text-sm font-semibold">UTR Number</h3>
-                <div className="space-y-2">
-                  <Label className="text-sm">
-                    UTR / Transaction Reference <span className="text-destructive">*</span>
-                  </Label>
-                  <Input
-                    value={utr}
-                    onChange={(e) => setUtr(e.target.value)}
-                    className="rounded-sm font-mono text-sm"
-                    placeholder="e.g. UTR202603180001"
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    Enter the UTR number from the payment confirmation.
-                  </p>
+              {/* UTR form — hidden for in_progress trades */}
+              {trade.status === "in_progress" ? (
+                <div className="border-t border-border pt-4">
+                  <div className="bg-blue-50 border border-blue-200 rounded p-3 text-xs text-blue-700 font-medium">
+                    UTR has been recorded for this trade. No further changes are allowed.
+                  </div>
+                  <div className="mt-3">
+                    <Button variant="outline" className="rounded-sm text-sm" onClick={onClose}>
+                      Close
+                    </Button>
+                  </div>
                 </div>
-                <div className="flex gap-2">
-                  <Button variant="outline" className="rounded-sm text-sm" onClick={onClose}>
-                    Cancel
-                  </Button>
-                  <Button
-                    className="flex-1 bg-accent text-accent-foreground hover:bg-accent/90 rounded-sm text-sm"
-                    disabled={utr.trim() === ""}
-                    onClick={handleSubmit}
-                  >
-                    Save UTR
-                  </Button>
+              ) : (
+                <div className="space-y-4 border-t border-border pt-4">
+                  <h3 className="text-sm font-semibold">UTR Number</h3>
+                  <div className="space-y-2">
+                    <Label className="text-sm">
+                      UTR / Transaction Reference <span className="text-destructive">*</span>
+                    </Label>
+                    <Input
+                      value={utr}
+                      onChange={(e) => setUtr(e.target.value)}
+                      className="rounded-sm font-mono text-sm"
+                      placeholder="e.g. UTR202603180001"
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Enter the UTR number from the payment confirmation.
+                    </p>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button variant="outline" className="rounded-sm text-sm" onClick={onClose}>
+                      Cancel
+                    </Button>
+                    <Button
+                      className="flex-1 bg-accent text-accent-foreground hover:bg-accent/90 rounded-sm text-sm"
+                      disabled={utr.trim() === ""}
+                      onClick={handleSubmit}
+                    >
+                      Save UTR
+                    </Button>
+                  </div>
                 </div>
-              </div>
+              )}
             </>
           )}
         </div>
@@ -427,6 +441,8 @@ export default function OpsTodaysTrades() {
                           ? "bg-success/10 text-success"
                           : trade.status === "pending_payment"
                           ? "bg-destructive/10 text-destructive"
+                          : trade.status === "in_progress"
+                          ? "bg-blue-100 text-blue-700"
                           : "bg-accent/10 text-accent"
                       }`}
                     >
