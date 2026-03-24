@@ -1,5 +1,7 @@
 import { Bond, PurchaseOrder, SellRequest, IFAClient, TradeRecord, BankAccount } from "@/types";
 
+const TODAY = new Date().toISOString().split("T")[0];
+
 export const MOCK_BANK_ACCOUNTS: BankAccount[] = [
   { id: "BANK-001", bankName: "HDFC Bank", accountNumber: "XXXX XXXX 4521", ifscCode: "HDFC0001234", accountHolderName: "Nisha Sharma", isDefault: true },
   { id: "BANK-002", bankName: "ICICI Bank", accountNumber: "XXXX XXXX 8832", ifscCode: "ICIC0005678", accountHolderName: "Nisha Sharma", isDefault: false },
@@ -131,11 +133,11 @@ export const MOCK_TRADES: TradeRecord[] = [
   { id: "TR-012", sellRequestId: "SR-002", investorName: "Rajesh Kumar", bond: BONDS_CATALOG[1], units: 50, settledYield: 8.10, settlementDate: "2026-03-18", status: "pending_payment" },
   { id: "TR-013", sellRequestId: "SR-003", investorName: "Priya Patel", bond: BONDS_CATALOG[2], units: 15, settledYield: 8.60, settlementDate: "2026-03-18", utrNumber: "UTR202603180001", rfqNumber: "RFQ-2026-0502", status: "settled" },
 
-  // Today's trades — 2026-03-20
-  { id: "TR-014", sellRequestId: "SR-001", investorName: "Nisha Sharma", bond: BONDS_CATALOG[0], units: 20, settledYield: 9.25, settlementDate: "2026-03-20", utrNumber: "UTR202603200001", rfqNumber: "RFQ-2026-0601", status: "in_progress" },
-  { id: "TR-015", sellRequestId: "SR-006", investorName: "Deepak Mehta", bond: BONDS_CATALOG[1], units: 20, settledYield: 8.30, settlementDate: "2026-03-20", utrNumber: "UTR202603200002", rfqNumber: "RFQ-2026-0602", status: "in_progress" },
-  { id: "TR-016", sellRequestId: "SR-007", investorName: "Kavita Singh", bond: BONDS_CATALOG[2], units: 25, settledYield: 8.55, settlementDate: "2026-03-20", status: "pending_payment" },
-  { id: "TR-017", sellRequestId: "SR-008", investorName: "Arjun Nair", bond: BONDS_CATALOG[3], units: 35, settledYield: 9.15, settlementDate: "2026-03-20", status: "pending_payment" },
-  { id: "TR-018", sellRequestId: "SR-009", investorName: "Meera Iyer", bond: BONDS_CATALOG[0], units: 15, settledYield: 9.00, settlementDate: "2026-03-20", utrNumber: "UTR202603200003", rfqNumber: "RFQ-2026-0603", status: "in_progress" },
-  { id: "TR-019", sellRequestId: "SR-002", investorName: "Rajesh Kumar", bond: BONDS_CATALOG[1], units: 50, settledYield: 8.10, settlementDate: "2026-03-20", status: "pending_payment" },
+  // Today's trades — dynamic
+  { id: "TR-014", sellRequestId: "SR-001", investorName: "Nisha Sharma", bond: BONDS_CATALOG[0], units: 20, settledYield: 9.25, settlementDate: TODAY, utrNumber: "UTR202603200001", rfqNumber: "RFQ-2026-0601", status: "in_progress" },
+  { id: "TR-015", sellRequestId: "SR-006", investorName: "Deepak Mehta", bond: BONDS_CATALOG[1], units: 20, settledYield: 8.30, settlementDate: TODAY, utrNumber: "UTR202603200002", rfqNumber: "RFQ-2026-0602", status: "in_progress" },
+  { id: "TR-016", sellRequestId: "SR-007", investorName: "Kavita Singh", bond: BONDS_CATALOG[2], units: 25, settledYield: 8.55, settlementDate: TODAY, status: "pending_payment" },
+  { id: "TR-017", sellRequestId: "SR-008", investorName: "Arjun Nair", bond: BONDS_CATALOG[3], units: 35, settledYield: 9.15, settlementDate: TODAY, status: "pending_payment" },
+  { id: "TR-018", sellRequestId: "SR-009", investorName: "Meera Iyer", bond: BONDS_CATALOG[0], units: 15, settledYield: 9.00, settlementDate: TODAY, utrNumber: "UTR202603200003", rfqNumber: "RFQ-2026-0603", status: "in_progress" },
+  { id: "TR-019", sellRequestId: "SR-002", investorName: "Rajesh Kumar", bond: BONDS_CATALOG[1], units: 50, settledYield: 8.10, settlementDate: TODAY, status: "pending_payment" },
 ];

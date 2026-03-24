@@ -92,17 +92,29 @@ function UploadUtrModal({ open, onClose }: { open: boolean; onClose: () => void 
 
 interface TradeViewDrawerProps {
   trade: TradeRecord;
+  disFileName?: string;
   onClose: () => void;
   onUtrSubmit: (tradeId: string, utr: string) => void;
+  onDisUpload: (tradeId: string, fileName: string) => void;
 }
 
-function TradeViewDrawer({ trade, onClose, onUtrSubmit }: TradeViewDrawerProps) {
+function TradeViewDrawer({ trade, disFileName, onClose, onUtrSubmit, onDisUpload }: TradeViewDrawerProps) {
   const [utr, setUtr] = useState(trade.utrNumber ?? "");
-  const [submitted, setSubmitted] = useState(false);
+  const [disCopy, setDisCopy] = useState<File | null>(null);
+  const [utrSaved, setUtrSaved] = useState(false);
+  const [disSaved, setDisSaved] = useState(false);
 
-  const handleSubmit = () => {
+  const isUtrLocked = trade.status === "in_progress";
+
+  const handleUtrSubmit = () => {
     onUtrSubmit(trade.id, utr);
-    setSubmitted(true);
+    setUtrSaved(true);
+  };
+
+  const handleDisSubmit = () => {
+    if (!disCopy) return;
+    onDisUpload(trade.id, disCopy.name);
+    setDisSaved(true);
   };
 
   return (
@@ -121,102 +133,125 @@ function TradeViewDrawer({ trade, onClose, onUtrSubmit }: TradeViewDrawerProps) 
         </div>
 
         <div className="p-4 space-y-5">
-          {submitted ? (
-            <div className="text-center space-y-4 py-10">
-              <div className="mx-auto w-14 h-14 bg-success/10 rounded-full flex items-center justify-center">
-                <Check className="h-7 w-7 text-success" />
-              </div>
-              <div className="space-y-1">
-                <h3 className="text-base font-semibold">UTR Saved</h3>
-                <p className="text-sm text-muted-foreground">
-                  UTR number <span className="font-mono font-medium">{utr}</span> has been recorded for {trade.id}.
-                </p>
-              </div>
-              <Button
-                className="bg-accent text-accent-foreground hover:bg-accent/90 rounded-sm text-sm"
-                onClick={onClose}
-              >
-                Done
-              </Button>
-            </div>
-          ) : (
-            <>
-              {/* Trade details */}
-              <div className="bg-muted/50 rounded-lg p-4 space-y-2 text-xs">
-                <p className="font-semibold text-sm">{trade.bond.name}</p>
-                <div className="grid grid-cols-2 gap-y-1.5">
-                  <span className="text-muted-foreground">ISIN</span>
-                  <span className="font-mono">{trade.bond.isin}</span>
-                  <span className="text-muted-foreground">Investor</span>
-                  <span>{trade.investorName}</span>
-                  <span className="text-muted-foreground">Units</span>
-                  <span>{trade.units}</span>
-                  <span className="text-muted-foreground">Settled Yield</span>
-                  <span className="font-semibold text-accent">{trade.settledYield}%</span>
-                  <span className="text-muted-foreground">Settlement Date</span>
-                  <span>{trade.settlementDate}</span>
-                  <span className="text-muted-foreground">Status</span>
-                  <span>{STATUS_LABELS[trade.status] ?? trade.status}</span>
-                  {trade.rfqNumber && (
-                    <>
-                      <span className="text-muted-foreground">RFQ</span>
-                      <span className="font-mono">{trade.rfqNumber}</span>
-                    </>
-                  )}
-                  {trade.utrNumber && (
-                    <>
-                      <span className="text-muted-foreground">UTR</span>
-                      <span className="font-mono">{trade.utrNumber}</span>
-                    </>
-                  )}
-                </div>
-              </div>
-
-              {/* UTR form — hidden for in_progress trades */}
-              {trade.status === "in_progress" ? (
-                <div className="border-t border-border pt-4">
-                  <div className="bg-blue-50 border border-blue-200 rounded p-3 text-xs text-blue-700 font-medium">
-                    UTR has been recorded for this trade. No further changes are allowed.
-                  </div>
-                  <div className="mt-3">
-                    <Button variant="outline" className="rounded-sm text-sm" onClick={onClose}>
-                      Close
-                    </Button>
-                  </div>
-                </div>
-              ) : (
-                <div className="space-y-4 border-t border-border pt-4">
-                  <h3 className="text-sm font-semibold">UTR Number</h3>
-                  <div className="space-y-2">
-                    <Label className="text-sm">
-                      UTR / Transaction Reference <span className="text-destructive">*</span>
-                    </Label>
-                    <Input
-                      value={utr}
-                      onChange={(e) => setUtr(e.target.value)}
-                      className="rounded-sm font-mono text-sm"
-                      placeholder="e.g. UTR202603180001"
-                    />
-                    <p className="text-xs text-muted-foreground">
-                      Enter the UTR number from the payment confirmation.
-                    </p>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button variant="outline" className="rounded-sm text-sm" onClick={onClose}>
-                      Cancel
-                    </Button>
-                    <Button
-                      className="flex-1 bg-accent text-accent-foreground hover:bg-accent/90 rounded-sm text-sm"
-                      disabled={utr.trim() === ""}
-                      onClick={handleSubmit}
-                    >
-                      Save UTR
-                    </Button>
-                  </div>
-                </div>
+          {/* Trade details */}
+          <div className="bg-muted/50 rounded-lg p-4 space-y-2 text-xs">
+            <p className="font-semibold text-sm">{trade.bond.name}</p>
+            <div className="grid grid-cols-2 gap-y-1.5">
+              <span className="text-muted-foreground">ISIN</span>
+              <span className="font-mono">{trade.bond.isin}</span>
+              <span className="text-muted-foreground">Investor</span>
+              <span>{trade.investorName}</span>
+              <span className="text-muted-foreground">Units</span>
+              <span>{trade.units}</span>
+              <span className="text-muted-foreground">Settled Yield</span>
+              <span className="font-semibold text-accent">{trade.settledYield}%</span>
+              <span className="text-muted-foreground">Settlement Date</span>
+              <span>{trade.settlementDate}</span>
+              <span className="text-muted-foreground">Status</span>
+              <span>{STATUS_LABELS[trade.status] ?? trade.status}</span>
+              {trade.rfqNumber && (
+                <>
+                  <span className="text-muted-foreground">RFQ</span>
+                  <span className="font-mono">{trade.rfqNumber}</span>
+                </>
               )}
-            </>
-          )}
+              {trade.utrNumber && (
+                <>
+                  <span className="text-muted-foreground">UTR</span>
+                  <span className="font-mono">{trade.utrNumber}</span>
+                </>
+              )}
+            </div>
+          </div>
+
+          {/* UTR section */}
+          <div className="space-y-3 border-t border-border pt-4">
+            <h3 className="text-sm font-semibold">UTR Number</h3>
+            {isUtrLocked ? (
+              <div className="bg-blue-50 border border-blue-200 rounded p-3 text-xs text-blue-700 font-medium">
+                UTR has been recorded for this trade. No further changes are allowed.
+              </div>
+            ) : utrSaved ? (
+              <div className="flex items-center gap-2 bg-success/10 border border-success/30 rounded p-3 text-xs text-success font-medium">
+                <Check className="h-3.5 w-3.5 shrink-0" />
+                UTR <span className="font-mono">{utr}</span> saved successfully.
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <Label className="text-sm">
+                  UTR / Transaction Reference <span className="text-destructive">*</span>
+                </Label>
+                <Input
+                  value={utr}
+                  onChange={(e) => setUtr(e.target.value)}
+                  className="rounded-sm font-mono text-sm"
+                  placeholder="e.g. UTR202603180001"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Enter the UTR number from the payment confirmation.
+                </p>
+                <Button
+                  className="w-full bg-accent text-accent-foreground hover:bg-accent/90 rounded-sm text-sm"
+                  disabled={utr.trim() === ""}
+                  onClick={handleUtrSubmit}
+                >
+                  Save UTR
+                </Button>
+              </div>
+            )}
+          </div>
+
+          {/* DIS Copy section — always available */}
+          <div className="space-y-3 border-t border-border pt-4">
+            <h3 className="text-sm font-semibold">
+              DIS Copy{" "}
+              <span className="text-muted-foreground font-normal text-xs">(optional)</span>
+            </h3>
+            {disSaved || disFileName ? (
+              <div className="flex items-center gap-2 bg-success/10 border border-success/30 rounded p-3 text-xs text-success font-medium">
+                <Check className="h-3.5 w-3.5 shrink-0" />
+                <span className="truncate">{disSaved ? disCopy?.name : disFileName}</span>
+              </div>
+            ) : null}
+            {!disSaved && (
+              <div className="space-y-2">
+                <input
+                  type="file"
+                  accept=".pdf,.jpg,.jpeg,.png"
+                  onChange={(e) => setDisCopy(e.target.files?.[0] ?? null)}
+                  className="w-full text-xs"
+                />
+                {disCopy && (
+                  <div className="rounded border border-border bg-muted/50 p-2 text-xs flex items-center justify-between">
+                    <span className="truncate">{disCopy.name}</span>
+                    <button
+                      className="ml-2 text-muted-foreground hover:text-foreground shrink-0"
+                      onClick={() => setDisCopy(null)}
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </div>
+                )}
+                <p className="text-xs text-muted-foreground">
+                  Upload the Delivery Instruction Slip. Accepted: PDF, JPG, PNG.
+                </p>
+                <Button
+                  variant="outline"
+                  className="w-full rounded-sm text-sm"
+                  disabled={!disCopy}
+                  onClick={handleDisSubmit}
+                >
+                  Upload DIS Copy
+                </Button>
+              </div>
+            )}
+          </div>
+
+          <div className="border-t border-border pt-4">
+            <Button variant="outline" className="rounded-sm text-sm" onClick={onClose}>
+              Close
+            </Button>
+          </div>
         </div>
       </div>
     </>
@@ -237,6 +272,7 @@ export default function OpsTodaysTrades() {
   const [trades, setTrades] = useState(() =>
     MOCK_TRADES.filter((t) => t.settlementDate === today)
   );
+  const [disFileNames, setDisFileNames] = useState<Record<string, string>>({});
   const [filters, setFilters] = useState<Filters>({
     id: "",
     investor: "",
@@ -281,7 +317,10 @@ export default function OpsTodaysTrades() {
     setTrades((prev) =>
       prev.map((t) => (t.id === tradeId ? { ...t, utrNumber: utr } : t))
     );
-    setViewTrade(null);
+  };
+
+  const handleDisUpload = (tradeId: string, fileName: string) => {
+    setDisFileNames((prev) => ({ ...prev, [tradeId]: fileName }));
   };
 
   const handleDownload = () => {
@@ -407,6 +446,7 @@ export default function OpsTodaysTrades() {
                 <th className="text-right p-3 font-medium">Units</th>
                 <th className="text-right p-3 font-medium">Yield</th>
                 <th className="text-left p-3 font-medium">UTR</th>
+                <th className="text-left p-3 font-medium">DIS</th>
                 <th className="text-left p-3 font-medium">Status</th>
                 <th className="text-right p-3 font-medium">Action</th>
               </tr>
@@ -430,6 +470,16 @@ export default function OpsTodaysTrades() {
                   <td className="p-3 text-xs font-mono">
                     {trade.utrNumber ? (
                       <span className="text-success">{trade.utrNumber}</span>
+                    ) : (
+                      <span className="text-muted-foreground">—</span>
+                    )}
+                  </td>
+                  <td className="p-3 text-xs">
+                    {disFileNames[trade.id] ? (
+                      <span className="inline-flex items-center gap-1 text-success">
+                        <Check className="h-3 w-3" />
+                        <span className="truncate max-w-[80px]">{disFileNames[trade.id]}</span>
+                      </span>
                     ) : (
                       <span className="text-muted-foreground">—</span>
                     )}
@@ -463,7 +513,7 @@ export default function OpsTodaysTrades() {
               ))}
               {filtered.length === 0 && (
                 <tr>
-                  <td colSpan={9} className="p-8 text-center text-sm text-muted-foreground">
+                  <td colSpan={10} className="p-8 text-center text-sm text-muted-foreground">
                     No trades match the current filters.
                   </td>
                 </tr>
