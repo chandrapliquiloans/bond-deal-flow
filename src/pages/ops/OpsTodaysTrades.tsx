@@ -546,7 +546,7 @@ export default function OpsTodaysTrades() {
                   {STATUS_LABELS[trade.status] ?? trade.status}
                 </span>
               </div>
-              <div className="grid grid-cols-3 gap-2 text-xs">
+              <div className="grid grid-cols-4 gap-2 text-xs">
                 <div>
                   <p className="text-muted-foreground">Units</p>
                   <p className="font-medium">{trade.units}</p>
@@ -560,6 +560,17 @@ export default function OpsTodaysTrades() {
                   <p className={`font-mono text-xs truncate ${trade.utrNumber ? "text-success" : "text-muted-foreground"}`}>
                     {trade.utrNumber ?? "—"}
                   </p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground">DIS</p>
+                  {disFileNames[trade.id] ? (
+                    <span className="inline-flex items-center gap-0.5 text-success">
+                      <Check className="h-3 w-3 shrink-0" />
+                      <span className="truncate text-xs">Uploaded</span>
+                    </span>
+                  ) : (
+                    <p className="text-muted-foreground">—</p>
+                  )}
                 </div>
               </div>
               <div className="pt-2 border-t border-border">
@@ -587,8 +598,10 @@ export default function OpsTodaysTrades() {
       {viewTrade && (
         <TradeViewDrawer
           trade={viewTrade}
+          disFileName={disFileNames[viewTrade.id]}
           onClose={() => setViewTrade(null)}
           onUtrSubmit={handleUtrSubmit}
+          onDisUpload={handleDisUpload}
         />
       )}
     </PortalLayout>

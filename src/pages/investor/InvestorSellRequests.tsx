@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Check, X, Clock, ArrowLeftRight } from "lucide-react";
+import { Check, X, Clock, ArrowLeftRight, Paperclip } from "lucide-react";
 
 interface ActionModalProps {
   modalState: { isOpen: boolean; action: string; requestId: string; remark: string };
@@ -197,6 +197,104 @@ function ActionModal({ modalState, requests, onClose, onSubmit, onRemarkChange }
               >
                 {`Confirm ${modalState.action}`}
               </Button>
+            )}
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
+
+interface DisUploadModalProps {
+  requestId: string | null;
+  existingFileName?: string;
+  onClose: () => void;
+  onUpload: (requestId: string, fileName: string) => void;
+}
+
+function DisUploadModal({ requestId, existingFileName, onClose, onUpload }: DisUploadModalProps) {
+  const [file, setFile] = useState<File | null>(null);
+  const [uploaded, setUploaded] = useState(false);
+
+  if (!requestId) return null;
+
+  const handleSubmit = () => {
+    if (!file) return;
+    onUpload(requestId, file.name);
+    setUploaded(true);
+  };
+
+  return (
+    <>
+      <div className="fixed inset-0 z-50 bg-foreground/50 flex items-center justify-center p-4">
+        <div className="bg-card w-full max-w-md rounded-lg shadow-xl">
+          <div className="flex items-center justify-between p-4 border-b border-border">
+            <h2 className="text-sm font-semibold">Upload DIS Copy</h2>
+            <button className="text-muted-foreground hover:text-foreground" onClick={onClose}>
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+          <div className="p-4 space-y-4">
+            {uploaded ? (
+              <div className="text-center space-y-3 py-4">
+                <div className="mx-auto w-12 h-12 bg-success/10 rounded-full flex items-center justify-center">
+                  <Check className="h-6 w-6 text-success" />
+                </div>
+                <p className="text-sm font-medium">DIS Copy Uploaded</p>
+                <p className="text-xs text-muted-foreground truncate">{file?.name}</p>
+              </div>
+            ) : (
+              <>
+                {existingFileName && (
+                  <div className="flex items-center gap-2 bg-success/10 border border-success/30 rounded p-3 text-xs text-success">
+                    <Check className="h-3.5 w-3.5 shrink-0" />
+                    <span className="truncate">Previously uploaded: {existingFileName}</span>
+                  </div>
+                )}
+                <p className="text-sm text-muted-foreground">
+                  Upload the Delivery Instruction Slip for sell request <span className="font-mono font-medium">{requestId}</span>. Accepted: PDF, JPG, PNG.
+                </p>
+                <input
+                  type="file"
+                  accept=".pdf,.jpg,.jpeg,.png"
+                  onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+                  className="w-full text-xs"
+                />
+                {file && (
+                  <div className="rounded border border-border bg-muted/50 p-2 text-xs flex items-center justify-between">
+                    <span className="truncate">{file.name}</span>
+                    <button
+                      className="ml-2 text-muted-foreground hover:text-foreground shrink-0"
+                      onClick={() => setFile(null)}
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+          <div className="flex items-center justify-end gap-2 p-4 border-t border-border">
+            {uploaded ? (
+              <Button
+                className="bg-accent text-accent-foreground hover:bg-accent/90 rounded-sm text-sm"
+                onClick={onClose}
+              >
+                Done
+              </Button>
+            ) : (
+              <>
+                <Button variant="outline" onClick={onClose} className="text-sm rounded-sm">
+                  Cancel
+                </Button>
+                <Button
+                  className="bg-accent text-accent-foreground hover:bg-accent/90 rounded-sm text-sm"
+                  disabled={!file}
+                  onClick={handleSubmit}
+                >
+                  Upload
+                </Button>
+              </>
             )}
           </div>
         </div>
@@ -515,6 +613,8 @@ export default function InvestorSellRequests() {
   const [requests, setRequests] = useState<SellRequest[]>([...MOCK_SELL_REQUESTS]);
   const [filter, setFilter] = useState<SellRequestStatus | "all">("all");
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [disUploadId, setDisUploadId] = useState<string | null>(null);
+  const [disFileNames, setDisFileNames] = useState<Record<string, string>>({});
   const [modalState, setModalState] = useState<{
     isOpen: boolean;
     action: string;
@@ -564,6 +664,10 @@ export default function InvestorSellRequests() {
     const newStatus = ACTION_STATUS_MAP[modalState.action];
     if (newStatus) updateStatus(modalState.requestId, newStatus);
     handleModalClose();
+  };
+
+  const handleDisUpload = (requestId: string, fileName: string) => {
+    setDisFileNames((prev) => ({ ...prev, [requestId]: fileName }));
   };
 
   const handleNegotiationConfirm = (
@@ -648,6 +752,15 @@ export default function InvestorSellRequests() {
               <Clock className="h-3 w-3 mr-1" />
               Check Payment
             </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              className="text-xs h-7 px-2"
+              onClick={() => setDisUploadId(request.id)}
+            >
+              <Paperclip className="h-3 w-3 mr-1" />
+              DIS
+            </Button>
           </div>
         );
       case "payment_done":
@@ -661,6 +774,15 @@ export default function InvestorSellRequests() {
             >
               <Clock className="h-3 w-3 mr-1" />
               Processing
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              className="text-xs h-7 px-2"
+              onClick={() => setDisUploadId(request.id)}
+            >
+              <Paperclip className="h-3 w-3 mr-1" />
+              DIS
             </Button>
           </div>
         );
@@ -676,6 +798,15 @@ export default function InvestorSellRequests() {
               <Clock className="h-3 w-3 mr-1" />
               In Progress
             </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              className="text-xs h-7 px-2"
+              onClick={() => setDisUploadId(request.id)}
+            >
+              <Paperclip className="h-3 w-3 mr-1" />
+              DIS
+            </Button>
           </div>
         );
       case "settled":
@@ -688,6 +819,15 @@ export default function InvestorSellRequests() {
               onClick={() => handleAction("View Details", request.id)}
             >
               View
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              className="text-xs h-7 px-2"
+              onClick={() => setDisUploadId(request.id)}
+            >
+              <Paperclip className="h-3 w-3 mr-1" />
+              DIS
             </Button>
           </div>
         );
@@ -759,6 +899,7 @@ export default function InvestorSellRequests() {
                 <th className="text-right p-3 font-medium">Units</th>
                 <th className="text-right p-3 font-medium">Yield</th>
                 <th className="text-left p-3 font-medium">Settlement Date</th>
+                <th className="text-left p-3 font-medium">DIS</th>
                 <th className="text-left p-3 font-medium">Status</th>
                 <th className="text-right p-3 font-medium">Actions</th>
               </tr>
@@ -772,6 +913,16 @@ export default function InvestorSellRequests() {
                   <td className="p-3 text-right">{req.units}</td>
                   <td className="p-3 text-right">{req.desiredYield}%</td>
                   <td className="p-3 text-xs">{req.transactionDate}</td>
+                  <td className="p-3 text-xs">
+                    {disFileNames[req.id] ? (
+                      <span className="inline-flex items-center gap-1 text-success">
+                        <Check className="h-3 w-3 shrink-0" />
+                        <span className="truncate max-w-[80px]">{disFileNames[req.id]}</span>
+                      </span>
+                    ) : (
+                      <span className="text-muted-foreground">—</span>
+                    )}
+                  </td>
                   <td className="p-3">
                     <StatusBadge status={req.status} />
                     {req.status === "settled" && req.utrNumber && (
@@ -809,6 +960,12 @@ export default function InvestorSellRequests() {
                 <span>{req.desiredYield}% yield</span>
                 <span>{req.transactionDate}</span>
               </div>
+              {disFileNames[req.id] && (
+                <div className="flex items-center gap-1 text-xs text-success">
+                  <Check className="h-3 w-3 shrink-0" />
+                  <span className="truncate">DIS: {disFileNames[req.id]}</span>
+                </div>
+              )}
               <div className="flex justify-end pt-2 border-t border-border">
                 {getActionButtons(req)}
               </div>
@@ -837,6 +994,14 @@ export default function InvestorSellRequests() {
         request={selectedRequest ?? null}
         onClose={() => setSelectedId(null)}
         onConfirm={handleNegotiationConfirm}
+      />
+
+      {/* DIS Upload Modal */}
+      <DisUploadModal
+        requestId={disUploadId}
+        existingFileName={disUploadId ? disFileNames[disUploadId] : undefined}
+        onClose={() => setDisUploadId(null)}
+        onUpload={handleDisUpload}
       />
     </PortalLayout>
   );
